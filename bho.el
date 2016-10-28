@@ -1,3 +1,34 @@
+;;; error-lines.el --- Org tree navigation using helm
+
+;; Copyright (C) 2016 Facet Framer
+
+;; Author: Facet Framer (facet@facetframer.com)
+;; URL: github.com/facetframer/bho
+;; Version: 0.1.0
+;; Package-Version: 20161028.1
+;; Created October 2016
+
+;; Keywords: org tree navigation
+
+;; This program is free software; you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+;;; Commentary and usage:
+;; See README.md
+
+;;; Code:
+
+
 (require 'helm)
 (require 'helm-org)
 (require 's)
@@ -14,12 +45,12 @@
     (cons "Decrease depth `M-h`" 'bho-decrease-depth)
     (cons "Increase depth `M-l`" 'bho-increase-depth)
     (cons "Explore node `M-m`" 'bho-explore)
-    (cons "Explore node `M-n`" 'bho-explore-parent)
+    (cons "Explore parent `M-n`" 'bho-explore-parent)
     (cons "Rename node `M-r`" 'bho--rename-action)
     (cons "Refile node `M-f`" 'bho-refile-action)
     (cons "Go to node `M-g`" 'bho--goto-char)
-    (cons "Go to node `M-c`" 'bho-clock-action)
-    (cons "Go to node `M-a`" 'bho-search-ancestors)
+    (cons "Clock into the node `M-c`" 'bho-clock-action)
+    (cons "Explore ancestors of a node `M-a`" 'bho-search-ancestors)
     ))
 
 (defun bho--make-candidate (point)
@@ -43,7 +74,6 @@
        (bho--filter-by-depth
         (bho--get-descendants bho-var-point)
         current-level (+ current-level bho-var-depth))))))
-
 
 (defun bho--get-anc-candidates ()
   (save-excursion
@@ -341,5 +371,5 @@ Start search in ancestors of current node
     nil))
 
 
-
 (provide 'bho)
+;;; boh.el ends here
