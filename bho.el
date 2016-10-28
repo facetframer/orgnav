@@ -171,7 +171,6 @@ Use buffer-name to give the helm search buffer a name. This is useful for helm-r
   (interactive)
   (helm :sources (list (bho--make-source default-action candidate-func)) :keymap bho-mapping :buffer buffer-name))
 
-
 (defun bho-search-subtree-sync (point depth &optional buffer-name)
   "Explore the subtree. Wait for the exploration to finish and return the point selected"
   ;; Work around for helm's asychronicity
@@ -183,6 +182,20 @@ Use buffer-name to give the helm search buffer a name. This is useful for helm-r
   (prog1
       bho-var-result
   (setq bho-var-result nil)))
+
+(defun bho-search-ancestors-sync (point &optional buffer-name)
+  "Explore the subtree. Wait for the exploration to finish and return the point selected"
+  ;; Work around for helm's asychronicity
+  (setq bho-var-result nil)
+  (bho-search-ancestors point 'bho--return-result buffer-name)
+  ;; RACE CONDITION
+  (while (null bho-var-result)
+    (sit-for 0.05))
+  (prog1
+      bho-var-result
+  (setq bho-var-result nil)))
+
+
 
 (defun bho--return-result (point)
   (setq bho-var-result point))
@@ -236,7 +249,7 @@ Use buffer-name to give the helm search buffer a name. This is useful for helm-r
   (org-refile nil nil (list nil buffer-file-name nil refile-point)))
 
 (defun bho-refile (source-point target-point)
-  "Refile the node at source-point to an ancestor of the node at target-point interactively."
+  "Refile the node at source-point to a descendant of the node at target-point interactively."
   (interactive (list nil nil))
   (save-excursion
     (if (not (null source-point))
@@ -283,6 +296,20 @@ Start search below the current node
                 (outline-back-to-heading 't)
                 (point))
               bho-refile-depth "*bho-capture*")))
+
+(defun bho-capture-function-ancestors ()
+  "A function that can be used with org-capture-template as a *function* capture point.
+Start search in ancestors of current node
+        (\"*\" \"Create a new entry\" entry (function bho-capture-function-ancestor) \"** Title\")
+
+"
+  (goto-char (bho-search-ancestors-sync
+              (save-excursion
+                (outline-back-to-heading 't)
+                (point))
+              "*bho-capture*")))
+
+
 
 (defun bho-refile-nearby (&optional up-levels-arg)
   "Refile nearby"
