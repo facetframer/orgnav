@@ -1,4 +1,4 @@
-;;; error-lines.el --- Org tree navigation using helm
+;;; bho.el --- Org tree navigation using helm
 
 ;; Copyright (C) 2016 Facet Framer
 
@@ -23,44 +23,50 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-;;; Commentary and usage:
+;;; Commentary:
 ;; See README.md
 
 ;;; Code:
-
 
 (require 'helm)
 (require 'helm-org)
 (require 's)
 
-(defun bho--make-source (default-action candidates-func)
+(defvar bho-refile-depth 2 "The number of levels to show when refiling.")
+(defvar bho-clock-depth 2 "The number of levels to show when clocking in.")
+(defvar bho-clock-buffer nil "The buffer to search when clocking in.")
+
+(defun bho--make-source (candidates-func default-action)
+  "Make helm source which gets candidates by calling CANDIDATES-FUNC.
+by default run DEFAULT-ACTION when return pressed."
   (list
    (cons 'name "HELM at the Emacs")
    (cons 'candidates candidate-func)
    (cons 'action (bho--make-actions default-action))))
 
 (defun bho--make-actions (default-action)
+  "Actions for used by helm.  On return run DEFAULT-ACTION."
   (list
     (cons "Default action" default-action)
-    (cons "Decrease depth `M-h`" 'bho-decrease-depth)
-    (cons "Increase depth `M-l`" 'bho-increase-depth)
-    (cons "Explore node `M-m`" 'bho-explore)
-    (cons "Explore parent `M-n`" 'bho-explore-parent)
+    (cons "Decrease depth `M-h`" 'bho--decrease-depth-action)
+    (cons "Increase depth `M-l`" 'bho--increase-depth-action)
+    (cons "Explore node `M-m`" 'bho--explore-action)
+    (cons "Explore parent `M-n`" 'bho--explore-parent-action)
     (cons "Rename node `M-r`" 'bho--rename-action)
-    (cons "Refile node `M-f`" 'bho-refile-action)
-    (cons "Go to node `M-g`" 'bho--goto-char)
-    (cons "Clock into the node `M-c`" 'bho-clock-action)
+    (cons "Refile node `M-f`" 'bho--refile-action)
+    (cons "Go to node `M-g`" 'bho--goto-action)
+    (cons "Clock into the node `M-c`" 'bho--clock-action)
     (cons "Explore ancestors of a node `M-a`" 'bho-search-ancestors)
     ))
 
 (defun bho--make-candidate (point)
-  "Construct a helm candidate from an org node at point"
+  "Construct a helm candidate from a node at POINT."
   (cons
    (bho--get-entry-str point)
    point))
 
 (defun bho--get-desc-candidates ()
-  "Helm candidate function for descendants"
+  "Helm candidate function for descendants."
   (save-excursion
     (set-buffer bho-var-buffer)
 
@@ -75,7 +81,8 @@
         (bho--get-descendants bho-var-point)
         current-level (+ current-level bho-var-depth))))))
 
-(defun bho--get-anc-candidates ()
+(defun bho--get-ancestor-candidates ()
+  "Find helm candidates for the ancestors of the location set by a search function."
   (save-excursion
     (set-buffer bho-var-buffer)
     (if bho-var-point
@@ -85,12 +92,14 @@
             (bho--ancestors))))
 
 (defun bho--get-entry-str (point)
-  "How bho should represent a heading"
+  "How bho should represent a the node at POINT."
   (save-excursion
     (goto-char point)
     (concat (s-repeat (org-outline-level) "*") " " (org-get-heading))))
 
 (defun bho--filter-by-depth (headings min-level max-level)
+  "Filter the nodes at points in HEADINGS.
+Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
   (-filter (lambda (x)
              (save-excursion
                (goto-char x)
@@ -102,7 +111,7 @@
            headings))
 
 (defun bho--get-descendants (tree)
-  "Get the positions of all the headings under this node"
+  "Get the positions of all the headings under the tree at TREE."
   (interactive)
   (let ((result))
     (save-excursion
@@ -113,33 +122,38 @@
         (org-map-tree (lambda () (add-to-list 'result (point) 't)))))
     result))
 
-(defun bho--goto-char (point)
+(defun bho--goto-action (helm-entry)
+  "Go to the node represented by HELM-ENTRY."
   (interactive)
-  (goto-char point)
+  (goto-char helm-entry)
   (org-reveal))
 
-(defun bho-explore (point)
-  (message (format "Exploring %S" point))
-  (bho-search-subtree point 1 bho-var-default-action bho-var-buffer-name))
+(defun bho--explore-action (helm-entry)
+  "Start search again from HELM-ENTRY."
+  (message (format "Exploring %S" helm-entry))
+  (bho-search-subtree helm-entry 1 bho-var-default-action bho-var-buffer-name))
 
-(defun bho-explore-parent (_)
-  (bho-search-subtree (bho-get-parent bho-var-point) 1 bho-var-default-action bho-var-buffer-name))
+(defun bho--explore-parent-action (ignored)
+  "Start search again from one level higher.  Ignore IGNORED."
+  (bho-search-subtree (bho--get-parent bho-var-point) 1 bho-var-default-action bho-var-buffer-name))
 
-(defun bho-search-ancestors (&optional node default-action buffer-name)
-  "Search through the ancestors of a node (by the default the current node)"
+(defun bho-search-ancestors (&optional node default-action helm-buffer-name)
+  "Search through the ancestors of NODE (by the default the current node).
+Run DEFAULT-ACTION on enter.  Name the helm buffer HELM-BUFFER-NAME.
+By default jump to a node."
   (interactive)
   (setq node (or node (save-excursion (org-back-to-heading) (point))))
-  (setq default-action (or default-action 'bho--goto-char))
-  (bho--search 'bho--get-anc-candidates node nil default-action buffer-name))
+  (setq default-action (or default-action 'bho--goto-action))
+  (bho--search 'bho--get-ancestor-candidates node nil default-action helm-buffer-name))
 
 (defun bho-search-clocking ()
-  "Search the relative to the clocking activity"
+  "Start a search relative to the currently clocking activity."
   (interactive)
   (save-excursion
     (org-clock-goto)
     (bho-search-ancestors)))
 
-(setq bho-mapping
+(defvar bho-mapping
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
     ;; We can't call these things directly because we need
@@ -159,17 +173,21 @@
     (define-key map (kbd "M-a") (lambda () (interactive) (helm-select-nth-action 9)))
     (define-key map (kbd "M-j") 'helm-next-line)
     (define-key map (kbd "M-k") 'helm-previous-line)
-    map))
+    map)
+  "Keyboard mapping within helm.")
 
-(defun bho-increase-depth (_)
+(defun bho--increase-depth-action (ignored)
+  "Search again showing nodes at a greater depth.  IGNORED is ignored."
   (interactive)
   (bho-search-subtree bho-var-point (+ bho-var-depth 1) bho-var-default-action) bho-var-buffer-name)
 
-(defun bho-decrease-depth (_)
+(defun bho--decrease-depth-action (ignored)
+  "Search again hiding more ancestors.  IGNORED is ignored."
   (interactive)
   (bho-search-subtree bho-var-point (max (- bho-var-depth 1) 1) bho-var-default-action) bho-var-buffer-name)
 
-(defun bho-get-parent (point)
+(defun bho--get-parent (point)
+  "Get the parent of the node at POINT."
   (save-excursion
     (goto-char point)
     (condition-case nil
@@ -178,16 +196,19 @@
           (point))
       (error nil))))
 
-(defun bho-search-subtree (point depth default-action &optional buffer-name)
-  "Explore the org subtree at `point`. If `point` is nil explore the buffer. This function returns immediately.
-Use buffer-name to give the helm search buffer a name. This is useful for helm-resume
-"
-  (interactive (list (point) 1 'bho--goto-char))
-  (bho--search 'bho--get-desc-candidates point depth default-action buffer-name))
+(defun bho-search-subtree (point depth default-action &optional helm-buffer-name)
+  "Explore the org subtree at POINT.  If POINT is nil explore the buffer.
+This function returns immediately.
+Show DEPTH levels.  By default run DEFAULT-ACTION on enter.
+If HELM-BUFFER-NAME create a helm buffer with this name (of use with `helm-resume')."
+  (interactive (list (point) 1 'bho--goto-action))
+  (bho--search 'bho--get-desc-candidates point depth default-action helm-buffer-name))
 
 (defun bho--search (candidate-func point depth default-action buffer-name)
-  "Search using the candidates generated by candidate-func"
-
+  "Search using the helm candidate function CANDIDATE-FUNC.
+Start at POINT, displaying DEPTH levels.
+On enter run DEFAULT-ACTION.
+Start searching in a buffer called BUFFER-NAME."
   ;; Ugg -- too many arguments
 
   ;; Candidate functions appear to
@@ -199,13 +220,15 @@ Use buffer-name to give the helm search buffer a name. This is useful for helm-r
   (setq bho-var-default-action default-action)
   (setq buffer-name (or buffer-name "*bho*"))
   (interactive)
-  (helm :sources (list (bho--make-source default-action candidate-func)) :keymap bho-mapping :buffer buffer-name))
+  (helm :sources (list (bho--make-source candidate-func default-action)) :keymap bho-mapping :buffer buffer-name))
 
 (defun bho-search-subtree-sync (point depth &optional buffer-name)
-  "Explore the subtree. Wait for the exploration to finish and return the point selected"
+  "Search the tree at POINT by default displaying DEPTH levels.
+Return the `(point)' at the selected node.
+Start searching in the buffer called BUFFER-NAME."
   ;; Work around for helm's asychronicity
   (setq bho-var-result nil)
-  (bho-search-subtree point depth 'bho--return-result buffer-name)
+  (bho-search-subtree point depth 'bho--return-result-action buffer-name)
   ;; RACE CONDITION
   (while (null bho-var-result)
     (sit-for 0.05))
@@ -214,10 +237,12 @@ Use buffer-name to give the helm search buffer a name. This is useful for helm-r
   (setq bho-var-result nil)))
 
 (defun bho-search-ancestors-sync (point &optional buffer-name)
-  "Explore the subtree. Wait for the exploration to finish and return the point selected"
+  "Search the ancesters of the node at POINT.
+Return the `(point)' at the selected node.
+Start searching in the buffer called BUFFER-NAME."
   ;; Work around for helm's asychronicity
   (setq bho-var-result nil)
-  (bho-search-ancestors point 'bho--return-result buffer-name)
+  (bho-search-ancestors point 'bho--return-result-action buffer-name)
   ;; RACE CONDITION
   (while (null bho-var-result)
     (sit-for 0.05))
@@ -225,17 +250,19 @@ Use buffer-name to give the helm search buffer a name. This is useful for helm-r
       bho-var-result
   (setq bho-var-result nil)))
 
-
-
-(defun bho--return-result (point)
-  (setq bho-var-result point))
+(defun bho--return-result-action (helm-entry)
+  "A convenience action for synchronouse functions.
+Store the location of HELM-ENTRY so that the synchronous functions can return them."
+  (setq bho-var-result helm-entry))
 
 (defun bho-search-root (depth default-action)
-  "Explore the current org document"
-  (interactive (list 1 'bho--goto-char))
+  "Explore all nodes in the current org document.
+Display DEPTH levels.  Run DEFAULT-ACTION on enter."
+  (interactive (list 1 'bho--goto-action))
   (bho-search-subtree nil depth default-action "*bho-search*"))
 
 (defun bho--rename (point name)
+  "Rename the node at POINT to NAME."
   (let (new-heading)
     (save-excursion
       (goto-char point)
@@ -246,81 +273,80 @@ Use buffer-name to give the helm search buffer a name. This is useful for helm-r
       (kill-line)
       (insert new-heading))))
 
-(defvar bho-refile-depth 2 "depth of tree to show when refiling")
-(defvar bho-clock-depth 2 "depth of tree to show when clocking in")
-(defvar bho-clock-buffer nil "Switch to this buffer when clocking in")
-
-(defun bho--rename-action (point)
+(defun bho--rename-action (helm-entry)
+  "Action to rename HELM-ENTRY."
   (interactive)
   (let (heading)
     (setq heading
           (read-string "New name" (save-excursion
-                              (goto-char point)
+                              (goto-char helm-entry)
                               (org-get-heading))))
-    (bho--rename point heading)
-    (bho-search-subtree bho-var-point bho-var-depth bho-var-default-action bho-var-buffer-name)
-    ))
+    (bho--rename helm-entry heading)
+    (bho-search-subtree bho-var-point bho-var-depth bho-var-default-action bho-var-buffer-name)))
 
-(defun bho-refile-action (point)
+(defun bho--refile-action (helm-entry)
+  "Refile the selected HELM-ENTRY."
   (interactive)
-  (goto-char point)
+  (goto-char helm-entry)
   (call-interactively 'org-refile)
-  (bho-refile point))
+  (bho-refile helm-entry))
 
-(defun bho-clock-action (point)
+(defun bho--clock-action (helm-entry)
+  "Clock into the selected HELM-ENTRY."
   (save-excursion
-    (goto-char point)
+    (goto-char helm-entry)
     (org-clock-in)))
 
-(defun bho-refile-to-point (refile-point)
-  (message (format "Refiling to %S" refile-point))
+(defun bho--refile-to-action (helm-entry)
+  "Action used by `bho-refile` to refile to the selected entry HELM-ENTRY."
+  (message (format "Refiling to %S" helm-entry))
   (setq bho-last-refile-mark (make-marker))
-  (set-marker bho-last-refile-mark refile-point)
-  (org-refile nil nil (list nil buffer-file-name nil refile-point)))
+  (set-marker bho-last-refile-mark helm-entry)
+  (org-refile nil nil (list nil buffer-file-name nil helm-entry)))
 
 (defun bho-refile (source-point target-point)
-  "Refile the node at source-point to a descendant of the node at target-point interactively."
+  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively."
   (interactive (list nil nil))
   (save-excursion
     (if (not (null source-point))
         (goto-char source-point))
-    (bho-search-subtree target-point bho-refile-depth 'bho-refile-to-point "*bho refile*")))
+    (bho-search-subtree target-point bho-refile-depth 'bho--refile-to-action "*bho refile*")))
 
 (defun bho-refile-again ()
+  "Refile to the location last selected by `bho-refile'."
   (interactive)
   (assert bho-last-refile-mark)
-  (bho-refile-to-point (marker-position bho-last-refile-mark))
+  (bho--refile-to-action (marker-position bho-last-refile-mark))
   (message
    (save-excursion
      (goto-char bho-last-refile-mark)
      (org-no-properties (org-get-heading)) ;; who needs encapsulation
-     ))
+     )))
 
-  )
-
-(defun bho-clock-in (buffer point)
-  "Clock in to an activity"
+(defun bho-clock-in (buffer node-point)
+  "Clock in to a node in an org buffer BUFFER, starting searching in descendents of NODE-POINT."
   (interactive (list bho-clock-buffer nil))
   (save-excursion
     (if (not (null buffer))
         (set-buffer buffer))
-    (bho-search-subtree nil bho-clock-depth 'bho-clock-action "*bho-clock-in*")))
+    (bho-search-subtree node-point bho-clock-depth 'bho--clock-action "*bho-clock-in*")))
 
 (defun bho-capture-function-global ()
-  "A function that can be used with org-capture-template as a *file+function* or *function* capture point
-Here is an example entry
-
-        (\"*\" \"Create a new entry\" entry (file+function \"test.org\" bho-capture-function-global) \"** Title\")
-
-"
+  "A function that can be used with `org-capture-template'.
+A *file+function* or *function* capture point to capture to
+a location selected using bho under the root node.
+Here is an example entry:
+        `(\"*\" \"Create a new entry\" entry
+              (file+function \"test.org\" bho-capture-function-global) \"** Title\")'"
   (goto-char (bho-search-subtree-sync nil bho-refile-depth "*bho-capture*")))
 
 (defun bho-capture-function-relative ()
-  "A function that can be used with org-capture-template as a *function* capture point.
-Start search below the current node
-        (\"*\" \"Create a new entry\" entry (function bho-capture-function-relative) \"** Title\")
-
-"
+  "A function that can be used with `org-capture-template'.
+A *function* capture point to capture to a location under
+the current node selected using bho.
+Here is an example entry:
+        `(\"*\" \"Create a new entry\" entry
+               (function bho-capture-function-relative) \"** Title\")'"
   (goto-char (bho-search-subtree-sync
               (save-excursion
                 (outline-back-to-heading 't)
@@ -328,39 +354,39 @@ Start search below the current node
               bho-refile-depth "*bho-capture*")))
 
 (defun bho-capture-function-ancestors ()
-  "A function that can be used with org-capture-template as a *function* capture point.
-Start search in ancestors of current node
-        (\"*\" \"Create a new entry\" entry (function bho-capture-function-ancestor) \"** Title\")
-
-"
+  "A function that can be used with `org-capture-template'.
+A *function* capture point'to capture to a ancestor
+of the current node.
+Here is an example entry:
+        (\"*\" \"Create a new entry\" entry (function bho-capture-function-ancestor) \"** Title\")"
   (goto-char (bho-search-ancestors-sync
               (save-excursion
                 (outline-back-to-heading 't)
                 (point))
               "*bho-capture*")))
 
-
-
-(defun bho-refile-nearby (&optional up-levels-arg)
-  "Refile nearby"
+(defun bho-refile-nearby (&optional levels-up)
+  "Refile nearby the current point.  Go up LEVELS-UP."
   (interactive)
-  (let* ((up-levels (or up-levels-arg 3)))
+  (let* ((up-levels (or levels-up 3)))
     (bho-refile (point) (save-excursion (org-back-to-heading) (outline-up-heading up-levels) (point)))))
 
 (defun bho-jump-interactive (base-filename base-heading)
+  "Jump to an ancestor for a heading in BASE-FILENAME called BASE-HEADING."
   (if (not (null base-filename)) (find-file base-filename))
-  (bho--goto-char
+  (bho--goto-action
    (bho-search-subtree-sync
     (and base-heading (org-find-exact-headline-in-buffer base-heading))
     2)))
 
 (defun bho--ancestors ()
-  "Find the ancestors of the current node"
+  "Find the ancestors of the current org node."
   (save-excursion
     (outline-back-to-heading 't)
     (cons (point) (evorg-ancestors-rec))))
 
 (defun bho--ancestors-rec ()
+  "Convenience function used by `bho--ancestors'."
   (if
       (condition-case nil
           (progn
@@ -370,6 +396,5 @@ Start search in ancestors of current node
       (cons (point) (evorg-ancestors-rec))
     nil))
 
-
 (provide 'bho)
-;;; boh.el ends here
+;;; bho.el ends here
