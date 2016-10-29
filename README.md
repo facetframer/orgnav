@@ -93,7 +93,7 @@ can be achieved in `bho` through org-capture.
 
 ## Contributing
 
-Contributions are hard.
+Contributions are welcome.
 
 Testing helm is hard. This may prove to be an issue for accepting contributions, but I can deal with this if anyone
 actually contributes anything. It's probably possible to script helm for testing however.
