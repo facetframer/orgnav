@@ -68,7 +68,7 @@ your workflow is quite consistent.
 
 The general purpose functionality of `bho` may be unnecessary for you:
 an inferior alternative to coding something for your specific workflow.
-Specifically, this is likely to be the case if you are rarely creating new nesting 
+Specifically, this is likely to be the case if you are rarely creating new nesting
 in your org file.
 
 ### org-sparse-tree
@@ -78,7 +78,7 @@ that it changes the folding of you buffer, and can show a lot of intermediate no
 slowing down reading.
 You can avoid problems related to "losing your place" by using `clone-indirect-buffer`
 to create multiple views of your buffer.
-`org-sparse-tree` also has the benefit of allowing in-place editing. 
+`org-sparse-tree` also has the benefit of allowing in-place editing.
 `helm` does not support this, but similar types of actions
 can be achieved in `bho` through org-capture.
 
@@ -91,5 +91,11 @@ can be achieved in `bho` through org-capture.
 * Some of the keybindings here almost certainly shadow `helm` defaults
 * There is no testing at the moment.
 
+## Contributing
 
+Contributions are hard.
 
+Testing helm is hard. This may prove to be an issue for accepting contributions, but I can deal with this if anyone
+actually contributes anything. It's probably possible to script helm for testing however.
+
+You can do some basic linting, and ensure that installation works using `test.sh`.
