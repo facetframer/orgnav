@@ -137,6 +137,14 @@ Display DEPTH levels.  Run DEFAULT-ACTION on enter."
         (goto-char source-point))
     (bho-search-subtree target-point bho-refile-depth 'bho--refile-to-action "*bho refile*")))
 
+(defun bho-refile-ancestors (source-point target-point)
+  "Refile the node at SOURCE-POINT to an ancestor of the node at TARGET-POINT interactively."
+  (interactive (list nil nil))
+  (save-excursion
+    (if (not (null source-point))
+        (goto-char source-point))
+    (bho-search-ancestors target-point 'bho--refile-to-action "*bho refile*")))
+
 (defun bho-refile-nearby (&optional levels-up)
   "Refile nearby the current point.  Go up LEVELS-UP."
   (interactive)
