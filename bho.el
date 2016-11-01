@@ -47,14 +47,14 @@
     ;; We should probably put a layer of naming
     ;; on top of this, so we don't refer to things
     ;; by index
-    (define-key map (kbd "M-h") (lambda () (interactive) (helm-select-nth-action 1)))
-    (define-key map (kbd "M-l") (lambda () (interactive) (helm-select-nth-action 2)))
-    (define-key map (kbd "M-m") (lambda () (interactive) (helm-select-nth-action 3)))
-    (define-key map (kbd "M-n") (lambda () (interactive) (helm-select-nth-action 4)))
-    (define-key map (kbd "M-r") (lambda () (interactive) (helm-select-nth-action 5)))
-    (define-key map (kbd "M-g") (lambda () (interactive) (helm-select-nth-action 7)))
-    (define-key map (kbd "M-c") (lambda () (interactive) (helm-select-nth-action 8)))
-    (define-key map (kbd "M-a") (lambda () (interactive) (helm-select-nth-action 9)))
+    (define-key map (kbd "M-h") (lambda () (interactive) (helm-exit-and-execute-action 'bho--decrease-depth-action)))
+    (define-key map (kbd "M-l") (lambda () (interactive) (helm-exit-and-execute-action 'bho--increase-depth-action)))
+    (define-key map (kbd "M-m") (lambda () (interactive) (helm-exit-and-execute-action 'bho--explore-action)))
+    (define-key map (kbd "M-n") (lambda () (interactive) (helm-exit-and-execute-action 'bho--explore-parent-action)))
+    (define-key map (kbd "M-r") (lambda () (interactive) (helm-exit-and-execute-action 'bho--rename-action)))
+    (define-key map (kbd "M-g") (lambda () (interactive) (helm-exit-and-execute-action 'bho--goto-action)))
+    (define-key map (kbd "M-c") (lambda () (interactive) (helm-exit-and-execute-action 'bho--clock-action)))
+    (define-key map (kbd "M-a") (lambda () (interactive) (helm-exit-and-execute-action 'bho-search-ancestors)))
     (define-key map (kbd "M-j") 'helm-next-line)
     (define-key map (kbd "M-k") 'helm-previous-line)
     map)
