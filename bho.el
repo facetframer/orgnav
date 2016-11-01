@@ -49,12 +49,13 @@
     ;; by index
     (define-key map (kbd "M-h") (lambda () (interactive) (helm-exit-and-execute-action 'bho--decrease-depth-action)))
     (define-key map (kbd "M-l") (lambda () (interactive) (helm-exit-and-execute-action 'bho--increase-depth-action)))
-    (define-key map (kbd "M-m") (lambda () (interactive) (helm-exit-and-execute-action 'bho--explore-action)))
-    (define-key map (kbd "M-n") (lambda () (interactive) (helm-exit-and-execute-action 'bho--explore-parent-action)))
+    (define-key map (kbd "M-.") (lambda () (interactive) (helm-exit-and-execute-action 'bho--explore-action)))
+    (define-key map (kbd "M-,") (lambda () (interactive) (helm-exit-and-execute-action 'bho--explore-parent-action)))
     (define-key map (kbd "M-r") (lambda () (interactive) (helm-exit-and-execute-action 'bho--rename-action)))
     (define-key map (kbd "M-g") (lambda () (interactive) (helm-exit-and-execute-action 'bho--goto-action)))
     (define-key map (kbd "M-c") (lambda () (interactive) (helm-exit-and-execute-action 'bho--clock-action)))
     (define-key map (kbd "M-a") (lambda () (interactive) (helm-exit-and-execute-action 'bho-search-ancestors)))
+    (define-key map (kbd "M-n") (lambda () (interactive) (helm-exit-and-execute-action 'bho--new-action)))
     (define-key map (kbd "M-j") 'helm-next-line)
     (define-key map (kbd "M-k") 'helm-previous-line)
     map)
@@ -244,8 +245,9 @@ by default run DEFAULT-ACTION when return pressed."
     (cons "Default action" default-action)
     (cons "Decrease depth `M-h`" 'bho--decrease-depth-action)
     (cons "Increase depth `M-l`" 'bho--increase-depth-action)
-    (cons "Explore node `M-m`" 'bho--explore-action)
-    (cons "Explore parent `M-n`" 'bho--explore-parent-action)
+    (cons "Explore node `M-.`" 'bho--explore-action)
+    (cons "Explore parent `M-,`" 'bho--explore-parent-action)
+    (cons "Create a new node `M-n`" 'bho--new-action)
     (cons "Rename node `M-r`" 'bho--rename-action)
     (cons "Go to node `M-g`" 'bho--goto-action)
     (cons "Clock into the node `M-c`" 'bho--clock-action)
@@ -327,10 +329,19 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 (defun bho--explore-parent-action (ignored)
   "Start search again from one level higher.  Ignore IGNORED."
   (bho-search-subtree (bho--get-parent bho--var-point) 1 bho--var-default-action bho--var-helm-buffer))
+
 (defun bho--increase-depth-action (ignored)
   "Search again showing nodes at a greater depth.  IGNORED is ignored."
   (interactive)
   (bho-search-subtree bho--var-point (+ bho--var-depth 1) bho--var-default-action) bho--var-helm-buffer)
+
+(defun bho--new-action (helm-entry)
+  "Create child under the select HELM-ENTRY.  IGNORED is ignored."
+  (let* (
+         (point-function (lambda ()  (set-buffer bho--var-buffer) (goto-char helm-entry)))
+         (org-capture-templates (list (list "." "Default action" 'entry (list 'function point-function) "* %(read-string \"Name\")"))))
+    (org-capture nil ".")))
+
 
 (defun bho--decrease-depth-action (ignored)
   "Search again hiding more ancestors.  IGNORED is ignored."

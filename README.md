@@ -12,7 +12,7 @@ As an example using this library you might:
 * Filter to tasks that are in progress by searching for INPROGRESS
 * Find a task that you are interested it using `M-j` and `M-k`
 * Look at the ancestors this task with `M-a`
-* Find an interesting ancestor and look at all its descendents with `M-m`
+* Find an interesting ancestor and look at all its descendents with `M-.`
 
 To get a summary for how to use this library, run `M-x bho-search-root` and press `TAB`
 for a list of keybindings. Using these keybindings is very much encouraged.
