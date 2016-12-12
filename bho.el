@@ -81,7 +81,11 @@
 This function returns immediately.
 Show DEPTH levels.  By default run DEFAULT-ACTION on enter.
 If HELM-BUFFER-NAME create a helm buffer with this name (of use with `helm-resume')."
-  (interactive (list (point) 1 'bho--goto-action))
+  (interactive (list (point) nil nil))
+
+  (setq depth (or depth 1))
+  (setq default-action (or default-action 'bho--goto-action))
+
   (bho--search 'bho--get-desc-candidates point depth default-action helm-buffer-name))
 
 (defun bho-search-ancestors (&optional node default-action helm-buffer-name)
