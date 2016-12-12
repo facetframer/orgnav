@@ -168,10 +168,9 @@ Display DEPTH levels.  Run DEFAULT-ACTION on enter."
   (if (null bho--var-last-refile-mark)
       (error 'no-last-run))
   (bho--refile-to-action (marker-position bho--var-last-refile-mark))
-  (message
-   (save-excursion
+  (save-excursion
      (goto-char bho--var-last-refile-mark)
-     (org-no-properties (org-get-heading)))))
+     (org-no-properties (org-get-heading))))
 
 (defun bho-clock-in (buffer node-point)
   "Clock in to a node in an org buffer BUFFER, starting searching in descendents of NODE-POINT."
@@ -328,12 +327,13 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 (defun bho--goto-action (helm-entry)
   "Go to the node represented by HELM-ENTRY."
   (interactive)
+  (bho--log "Action: go to %S" helm-entry)
   (goto-char helm-entry)
   (org-reveal))
 
 (defun bho--explore-action (helm-entry)
   "Start search again from HELM-ENTRY."
-  (message (format "Exploring %S" helm-entry))
+  (bho--log "Action: explore %S" helm-entry)
   (bho-search-subtree helm-entry 1 bho--var-default-action bho--var-helm-buffer))
 
 (defun bho--explore-ancestors-action (helm-entry)
@@ -346,15 +346,18 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 
 (defun bho--explore-parent-action (ignored)
   "Start search again from one level higher.  Ignore IGNORED."
+  (bho--log "Action: explore parent of search at %S"
+            bho-var-point)
   (bho-search-subtree (bho--get-parent bho--var-point) 1 bho--var-default-action bho--var-helm-buffer))
 
 (defun bho--increase-depth-action (ignored)
   "Search again showing nodes at a greater depth.  IGNORED is ignored."
-  (interactive)
+  (bho--log "Action: Increasing depth of search")
   (bho-search-subtree bho--var-point (+ bho--var-depth 1) bho--var-default-action) bho--var-helm-buffer)
 
 (defun bho--new-action (helm-entry)
   "Create child under the select HELM-ENTRY.  IGNORED is ignored."
+  (bho--log "Action: Creating a new node under %S" helm-entry)
   (let* (
          (point-function (lambda ()  (set-buffer bho--var-buffer) (goto-char helm-entry)))
          (org-capture-templates (list (list "." "Default action" 'entry (list 'function point-function) "* %(read-string \"Name\")"))))
@@ -363,7 +366,7 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 
 (defun bho--decrease-depth-action (ignored)
   "Search again hiding more ancestors.  IGNORED is ignored."
-  (interactive)
+  (bho--log "Action: decrease depth of search")
   (bho-search-subtree bho--var-point (max (- bho--var-depth 1) 1) bho--var-default-action) bho--var-helm-buffer)
 
 (defun bho--get-parent (point)
@@ -391,13 +394,26 @@ Search in a helm buffer with the name HELM-BUFFER-NAME."
   (setq helm-buffer-name (or helm-buffer-name "*bho"))
   (setq bho--var-default-action default-action)
 
-  (bho--log "called bho--search")
-  (bho--log "bho--search default action %S" bho--var-default-action)
+  (bho--log "bho--search candidate-func=%S action=%S header=%S"
+            candidate-func
+            bho--var-default-action
+            (bho--get-heading
+             bho--var-buffer
+             bho--var-point))
   (helm :sources (list (bho--make-source candidate-func default-action)) :keymap bho-mapping :buffer helm-buffer-name))
+
+(defun bho--get-heading (buffer point)
+  "Get the heading of an org element in BUFFER at POINT."
+  (save-current-buffer
+    (save-excursion
+      (set-buffer buffer)
+      (goto-char point)
+      (substring-no-properties (org-get-heading)))))
 
 (defun bho--return-result-action (helm-entry)
   "A convenience action for synchronouse functions.
 Store the location of HELM-ENTRY so that the synchronous functions can return them."
+  (bho--log "Action: Saving %S to return" helm-entry)
   (setq bho--var-result helm-entry))
 
 (defun bho--rename (point name)
@@ -414,7 +430,7 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
 
 (defun bho--rename-action (helm-entry)
   "Action to rename HELM-ENTRY."
-  (interactive)
+  (bho--log "Action: renaming %S" helm-entry)
   (let (heading)
     (setq heading
           (read-string "New name" (save-excursion
@@ -425,13 +441,14 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
 
 (defun bho--clock-action (helm-entry)
   "Clock into the selected HELM-ENTRY."
+  (bho--log "Action: Clocking into %S" helm-entry)
   (save-excursion
     (goto-char helm-entry)
     (org-clock-in)))
 
 (defun bho--refile-to-action (helm-entry)
   "Action used by `bho-refile` to refile to the selected entry HELM-ENTRY."
-  (message (format "Refiling to %S" helm-entry))
+  (bho--log "Action: refiling %S to %S" (point) helm-entry)
   (setq bho--var-last-refile-mark (make-marker))
   (set-marker bho--var-last-refile-mark helm-entry)
   (org-refile nil nil (list nil buffer-file-name nil helm-entry)))
