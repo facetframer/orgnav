@@ -35,7 +35,7 @@
 (require 's)
 (require 'dash)
 
-(defvar bho-log nil "Whether bho should log")
+(defvar bho-log nil "Whether bho should log.")
 (defvar bho-refile-depth 2 "The number of levels to show when refiling.")
 (defvar bho-clock-depth 2 "The number of levels to show when clocking in.")
 (defvar bho-clock-buffer nil "The buffer to search when clocking in.")
@@ -69,12 +69,12 @@
 (defvar bho--var-helm-buffer nil "Private state.")
 (defvar bho--var-point nil "Private state.")
 (defvar bho--var-result nil "Private state.")
-(defvar bho--var-last-refile-mark nil "Private state")
+(defvar bho--var-last-refile-mark nil "Private state.")
 
-(defun bho--log (fmt-string &rest args)
+(defun bho--log (format-string &rest args)
+  "Print logging depending of BHO-LOG variable.  FORMAT-STRING  and ARGS have the same meanings as message."
   (when bho-log
-    (message (apply 'format fmt-string args))))
-
+    (message (apply 'format format-string args))))
 
 (defun bho-search-subtree (point &optional depth default-action helm-buffer-name)
   "Explore the org subtree at POINT.  If POINT is nil explore the buffer.
@@ -112,7 +112,7 @@ Start searching in the buffer called BUFFER-NAME."
   (setq bho--var-result nil)))
 
 (defun bho-search-ancestors-sync (point &optional buffer-name)
-  "Search the ancesters of the node at POINT.
+  "Search the ancestors of the node at POINT.
 Return the `(point)' at the selected node.
 Start searching in the buffer called BUFFER-NAME."
   ;; Work around for helm's asychronicity
@@ -242,7 +242,7 @@ Here is an example entry:
     nil))
 
 (defun bho--make-source (candidate-func default-action)
-  "Make helm source which gets candidates by calling CANDIDATES-FUNC.
+  "Make helm source which gets candidates by calling CANDIDATE-FUNC.
 by default run DEFAULT-ACTION when return pressed."
   (list
    (cons 'name "HELM at the Emacs")
