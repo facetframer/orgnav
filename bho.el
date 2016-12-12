@@ -382,6 +382,9 @@ Search in a helm buffer with the name HELM-BUFFER-NAME."
   (setq bho--var-depth depth)
   (setq helm-buffer-name (or helm-buffer-name "*bho"))
   (setq bho--var-default-action default-action)
+
+  (bho--log "called bho--search")
+  (bho--log "bho--search default action %S" bho--var-default-action)
   (helm :sources (list (bho--make-source candidate-func default-action)) :keymap bho-mapping :buffer helm-buffer-name))
 
 (defun bho--return-result-action (helm-entry)
