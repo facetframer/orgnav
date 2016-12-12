@@ -55,7 +55,7 @@
     (define-key map (kbd "M-r") (lambda () (interactive) (helm-exit-and-execute-action 'bho--rename-action)))
     (define-key map (kbd "M-g") (lambda () (interactive) (helm-exit-and-execute-action 'bho--goto-action)))
     (define-key map (kbd "M-c") (lambda () (interactive) (helm-exit-and-execute-action 'bho--clock-action)))
-    (define-key map (kbd "M-a") (lambda () (interactive) (helm-exit-and-execute-action 'bho-search-ancestors)))
+    (define-key map (kbd "M-a") (lambda () (interactive) (helm-exit-and-execute-action 'bho--explore-ancestors-action)))
     (define-key map (kbd "M-n") (lambda () (interactive) (helm-exit-and-execute-action 'bho--new-action)))
     (define-key map (kbd "M-j") 'helm-next-line)
     (define-key map (kbd "M-k") 'helm-previous-line)
@@ -335,6 +335,14 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
   "Start search again from HELM-ENTRY."
   (message (format "Exploring %S" helm-entry))
   (bho-search-subtree helm-entry 1 bho--var-default-action bho--var-helm-buffer))
+
+(defun bho--explore-ancestors-action (helm-entry)
+  "Start search again looking ancestors of HELM-ENTRY."
+  (bho--log "Action: explore ancestors of %S" helm-entry)
+  (bho-search-ancestors
+   helm-entry
+   bho--var-default-action
+   bho--var-helm-buffer))
 
 (defun bho--explore-parent-action (ignored)
   "Start search again from one level higher.  Ignore IGNORED."
