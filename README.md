@@ -37,6 +37,14 @@ You may well want to set up some keybindings using
 are provided since users of this library
 likely have strong opinions about such things.
 
+## Debugging
+
+Try setting the bho-log variable and reviewing the messages buffer
+
+```
+(setq bho-log 't)
+```
+
 ## Advanced features
 ### Extensibility
 Functions are moderately flexible and you can call them yourself from elisp.
