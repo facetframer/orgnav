@@ -35,6 +35,7 @@
 (require 's)
 (require 'dash)
 
+(defvar bho-log nil "Whether bho should log")
 (defvar bho-refile-depth 2 "The number of levels to show when refiling.")
 (defvar bho-clock-depth 2 "The number of levels to show when clocking in.")
 (defvar bho-clock-buffer nil "The buffer to search when clocking in.")
@@ -70,7 +71,12 @@
 (defvar bho--var-result nil "Private state.")
 (defvar bho--var-last-refile-mark nil "Private state")
 
-(defun bho-search-subtree (point depth default-action &optional helm-buffer-name)
+(defun bho--log (fmt-string &rest args)
+  (when bho-log
+    (message (apply 'format fmt-string args))))
+
+
+(defun bho-search-subtree (point &optional depth default-action helm-buffer-name)
   "Explore the org subtree at POINT.  If POINT is nil explore the buffer.
 This function returns immediately.
 Show DEPTH levels.  By default run DEFAULT-ACTION on enter.
