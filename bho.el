@@ -150,7 +150,7 @@ Display DEPTH levels.  Run DEFAULT-ACTION on enter."
   "Refile nearby the current point.  Go up LEVELS-UP."
   (interactive)
   (let* ((up-levels (or levels-up 3)))
-    (bho-refile (point) (save-excursion (org-back-to-heading) (outline-up-heading up-levels) (point)))))
+    (bho-refile (point) (save-excursion (org-back-to-heading) (outline-up-heading up-levels t) (point)))))
 
 (defun bho-refile-again ()
   "Refile to the location last selected by `bho-refile'."
