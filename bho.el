@@ -433,8 +433,10 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
   (save-current-buffer
     (save-excursion
       (set-buffer buffer)
-      (goto-char point)
-      (substring-no-properties (org-get-heading)))))
+      (or (point)
+          (progn
+            (goto-char point)
+            (substring-no-properties (org-get-heading)))))))
 
 (defun bho--get-descendants (tree)
   "Get the positions of all the headings under the tree at TREE."
