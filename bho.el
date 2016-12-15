@@ -127,11 +127,13 @@ By default jump to a node."
         (goto-char source-point))
     (bho-search-ancestors target-point 'bho--refile-to-action "*bho refile*")))
 
-(defun bho-refile-nearby (&optional levels-up)
-  "Refile nearby the current point.  Go up LEVELS-UP."
+(defun bho-refile-nearby (&optional levels-up keep)
+  "Refile nearby the current point.  Go up LEVELS-UP. If KEEP keep the original entry."
   (interactive)
-  (let* ((up-levels (or levels-up 3)))
-    (bho-refile (point) (save-excursion (org-back-to-heading) (outline-up-heading up-levels t) (point)))))
+  (let* (
+         (up-levels (or levels-up 3))
+         (refile-function (if keep 'bho-refile 'bho-refile-keep)))
+    (funcall refile-function (point) (save-excursion (org-back-to-heading) (outline-up-heading up-levels t) (point)))))
 
 (defun bho-refile-again ()
   "Refile to the location last selected by `bho-refile'."
