@@ -111,6 +111,14 @@ By default jump to a node."
         (goto-char source-point))
     (bho-search-subtree target-point bho-refile-depth 'bho--refile-to-action "*bho refile*")))
 
+(defun bho-refile-keep (source-point target-point)
+  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively."
+  (interactive (list nil nil))
+  (save-excursion
+    (if (not (null source-point))
+        (goto-char source-point))
+    (bho-search-subtree target-point bho-refile-depth 'bho--refile-keep-to-action "*bho refile*")))
+
 (defun bho-refile-ancestors (source-point target-point)
   "Refile the node at SOURCE-POINT to an ancestor of the node at TARGET-POINT interactively."
   (interactive (list nil nil))
@@ -416,6 +424,13 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
   (set-marker bho--var-last-refile-mark helm-entry)
   (org-refile nil nil (list nil buffer-file-name nil helm-entry)))
 
+(defun bho--refile-keep-to-action (helm-entry)
+  "Action used by `bho-refile-keep` to refile to the selected entry
+HELM-ENTRY whilst keeping the original entry."
+  (bho--log "Action: refiling %S to %S" (point) helm-entry)
+  (setq bho--var-last-refile-mark (make-marker))
+  (set-marker bho--var-last-refile-mark helm-entry)
+  (org-refile 3 nil (list nil buffer-file-name nil helm-entry)))
 
 ;;; Utility functions
 (defun bho--get-parent (point)
