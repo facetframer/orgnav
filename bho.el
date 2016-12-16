@@ -65,12 +65,12 @@
   "Keyboard mapping within helm.")
 
 ;; Private state variables
-(defvar bho--var-buffer nil "Private state.")
-(defvar bho--var-default-action nil "Private state.")
-(defvar bho--var-depth nil "Private state.")
-(defvar bho--var-helm-buffer nil "Private state.")
-(defvar bho--var-point nil "Private state.")
-(defvar bho--var-result nil "Private state.")
+(defvar bho--var-buffer nil "Private state.  Which buffer to search.")
+(defvar bho--var-default-action nil "Private state.  Action to carry out on pressing enter.")
+(defvar bho--var-depth nil "Private state.  Depth of tree to show.")
+(defvar bho--var-helm-buffer nil "Private state.  Name of the helm buffer.")
+(defvar bho--var-point nil "Private state.  Point of tree to start searching.")
+(defvar bho--var-result nil "Private state.  Variable to store the result of synchronous calls.")
 (defvar bho--var-last-refile-mark nil "Private state.")
 
 
@@ -92,11 +92,12 @@ PLIST is a property list with optional properties:
 :default-action the action run on enter (goto pont by default)
 :helm-buffer-name the name of the helm search buffer (of use with `helm-resume')."
   (interactive (list (point)))
-  (bho--assert-plist plist :depth :default-action :helm-buffer-name)
-  (let (depth default-action helm-buffer-name)
+  (bho--assert-plist plist :depth :default-action :helm-buffer-name :input)
+  (let (depth default-action helm-buffer-name input)
     (setq depth (plist-get plist :depth))
     (setq default-action (plist-get plist :default-action))
     (setq helm-buffer-name (plist-get plist :helm-buffer-name))
+    (setq input (plist-get plist :input))
     (setq depth (or depth 1))
     (setq default-action (or default-action 'bho--goto-action))
     (bho--search
@@ -104,7 +105,8 @@ PLIST is a property list with optional properties:
      :point point
      :depth depth
      :default-action default-action
-     :helm-buffer-name helm-buffer-name)))
+     :helm-buffer-name helm-buffer-name
+     :input input)))
 
 (defun bho-search-ancestors (&optional node &rest plist)
   "Search through the ancestors of NODE (by the default the current node).
@@ -112,10 +114,11 @@ PLIST is a property list with the following values
 :default-action is run on enter (by default jump to node)
 :helm-buffer-name is the name of the helm search buffer (useful with ‘helm-resume’)."
   (interactive)
-  (bho--assert-plist plist :default-action :helm-buffer-name)
-  (let (default-action helm-buffer-name)
+  (bho--assert-plist plist :default-action :helm-buffer-name :input)
+  (let (default-action helm-buffer-name input)
     (setq default-action (plist-get plist :default-action))
     (setq helm-buffer-name (plist-get plist  :helm-buffer-name))
+    (setq input (plist-get plist :input))
     (setq node (or node (save-excursion (org-back-to-heading) (point))))
     (setq default-action (or default-action 'bho--goto-action))
     (bho--search
@@ -123,7 +126,8 @@ PLIST is a property list with the following values
      :point node
      :depth nil
      :default-action default-action
-     :helm-buffer-name helm-buffer-name)))
+     :helm-buffer-name helm-buffer-name
+     :input input)))
 
 
 ;;; Interactive entry points for refiling
@@ -286,19 +290,19 @@ PLIST is a property list of *mandatory* values:
 `:point' is where we are searching relative t.
 `:depth' is how many levels to display.
 `:default-action' is the function to run on carriage return.
-`:helm-buffer-name' is name of the helm buffer (relvant for `helm-resume')."
-  (let (candidate-func point depth default-action helm-buffer-name)
+`:helm-buffer-name' is name of the helm buffer (relvant for `helm-resume').
+`:input' is the initial search term"
+  (let (candidate-func point depth default-action helm-buffer-name input)
     (when (not (bho--set-eq
               (bho--plist-keys plist)
-              (list :candidate-func :point :depth :default-action :helm-buffer-name)))
+              (list :candidate-func :point :depth :default-action :helm-buffer-name :input)))
       (error "Wrong keys"))
     (setq candidate-func (plist-get plist :candidate-func))
     (setq point (plist-get plist :point))
     (setq depth (plist-get plist :depth))
+    (setq input (plist-get plist :input))
     (setq default-action (plist-get plist :default-action))
     (setq helm-buffer-name (plist-get plist :helm-buffer-name))
-
-
 
     ;; Candidate functions appear to
     ;;   not be run in the current buffer, we need to keep track of the buffer
@@ -308,16 +312,18 @@ PLIST is a property list of *mandatory* values:
     (setq helm-buffer-name (or helm-buffer-name "*bho"))
     (setq bho--var-default-action default-action)
 
-    (bho--log "bho--search candidate-func=%S action=%S header=%S depth=%S"
+    (bho--log "bho--search candidate-func=%S action=%S header=%S depth=%S input=%S"
               candidate-func
               bho--var-default-action
-              (bho--get-heading
-               bho--var-buffer
-               bho--var-point
-               )
+              (bho--get-heading bho--var-buffer bho--var-point)
               bho--var-depth
-              )
-    (helm :sources (list (bho--make-source candidate-func default-action)) :keymap bho-mapping :buffer helm-buffer-name)))
+              input)
+    (helm
+     :sources (list (bho--make-source candidate-func default-action))
+     :keymap bho-mapping
+     :input input
+     :buffer helm-buffer-name
+     :input input)))
 
 (defun bho--ancestors ()
   "Find the ancestors of the current org node."
@@ -448,7 +454,17 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
   (bho-search-subtree bho--var-point
                       :depth (+ bho--var-depth 1)
                       :default-action bho--var-default-action
-                      :helm-buffer-name bho--var-helm-buffer))
+                      :helm-buffer-name bho--var-helm-buffer
+                      :input (bho--get-input)))
+
+(defun bho--decrease-depth-action (ignored)
+  "Search again hiding more descendents.  IGNORED is ignored."
+  (bho--log "Action: decrease depth of search")
+  (bho-search-subtree bho--var-point
+                      :depth (max (- bho--var-depth 1) 1)
+                      :default-action bho--var-default-action
+                      :helm-buffer-name bho--var-helm-buffer
+                      :input (bho--get-input)))
 
 (defun bho--new-action (helm-entry)
   "Create child under the select HELM-ENTRY.  IGNORED is ignored."
@@ -464,14 +480,6 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
   (bho--log "Action: Saving %S to return" helm-entry)
   (setq bho--var-result helm-entry))
 
-(defun bho--decrease-depth-action (ignored)
-  "Search again hiding more ancestors.  IGNORED is ignored."
-  (bho--log "Action: decrease depth of search")
-  (bho-search-subtree bho--var-point
-                      :depth (max (- bho--var-depth 1) 1)
-                      :default-action bho--var-default-action
-                      :helm-buffer-name bho--var-helm-buffer))
-
 (defun bho--rename-action (helm-entry)
   "Action to rename HELM-ENTRY."
   (bho--log "Action: renaming %S" helm-entry)
@@ -484,7 +492,8 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
     (bho-search-subtree bho--var-point
                         :depth bho--var-depth
                         :default-action bho--var-default-action
-                        :helm-buffer-name bho--var-helm-buffer)))
+                        :helm-buffer-name bho--var-helm-buffer
+                        :input (bho--get-input))))
 
 (defun bho--clock-action (helm-entry)
   "Clock into the selected HELM-ENTRY."
@@ -573,6 +582,10 @@ The original entry is kept unlike `bho--refile-to-action'."
   (and
    (cl-subsetp set1 set2)
    (cl-subsetp set2 set1)))
+
+(defun bho--get-input ()
+  "Get the current input of the helm search."
+  helm-input)
 
 (provide 'bho)
 ;;; bho.el ends here
