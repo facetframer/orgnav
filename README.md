@@ -1,6 +1,7 @@
-# bho -- Better helm org
-A hacky alternative to the `helm-org` package within `helm`, providing the ability to interactively
-and iteratively search through org trees, carrying out various actions on nodes.
+# orgnav
+
+Quickly navigate and search your emacs org trees; use this navigation to capture and organize.
+Built with the help of helm.
 
 ## Motivational introduction
 
@@ -14,10 +15,10 @@ As an example using this library you might:
 * Look at the ancestors this task with `M-a`
 * Find an interesting ancestor and look at all its descendents with `M-.`
 
-To get a summary for how to use this library, run `M-x bho-search-root` and press `TAB`
+To get a summary for how to use this library, run `M-x orgnav-search-root` and press `TAB`
 for a list of keybindings. Using these keybindings is very much encouraged.
 
-Running `M-x bho<TAB>` for a list of function is advised: functions without `--`s them
+Running `M-x orgnav<TAB>` for a list of function is advised: functions without `--`s them
 are public functions that you might like to call.
 
 ## Installing
@@ -25,7 +26,7 @@ are public functions that you might like to call.
 Place this repository on your `load-path`. Add
 
 ```
-(require `bho)
+(require `orgnav)
 ```
 
 to your `init.el`.
@@ -39,10 +40,10 @@ likely have strong opinions about such things.
 
 ## Debugging
 
-Try setting the bho-log variable and reviewing the messages buffer
+Try setting the orgnav-log variable and reviewing the messages buffer
 
 ```
-(setq bho-log 't)
+(setq orgnav-log 't)
 ```
 
 ## Advanced features
@@ -64,7 +65,7 @@ There are functions for:
 ## Alternatives
 
 # helm-org
-`helm-org` has the feeling of a proof-of-concept library. `bho` is more complete, and
+`helm-org` has the feeling of a proof-of-concept library. `orgnav` is more complete, and
 intends to be more of a complete navigation tool than a searching library.
 However, for simple use cases, `helm-org` may be good enough and is likely more stable.
 You may be able to use `narrowing` to work around some of the limitations.
@@ -74,7 +75,7 @@ Though initially slightly cryptic, for more general-purpose use cases,
 these functions are very powerful. This is particularly the case if
 your workflow is quite consistent.
 
-The general purpose functionality of `bho` may be unnecessary for you:
+The general purpose functionality of `orgnav` may be unnecessary for you:
 an inferior alternative to coding something for your specific workflow.
 Specifically, this is likely to be the case if you are rarely creating new nesting
 in your org file.
@@ -88,7 +89,7 @@ You can avoid problems related to "losing your place" by using `clone-indirect-b
 to create multiple views of your buffer.
 `org-sparse-tree` also has the benefit of allowing in-place editing.
 `helm` does not support this, but similar types of actions
-can be achieved in `bho` through org-capture.
+can be achieved in `orgnav` through org-capture.
 
 ## Caveats
 

@@ -20,6 +20,6 @@ emacs -q --batch --eval "
 (add-to-list 'package-archives '(\"melpa-stable\" . \"http://stable.melpa.org/packages/\") t)
 (package-initialize)
 (package-refresh-contents)
-(package-install-file \"bho.el\")
+(package-install-file \"orgnav.el\")
 (setq byte-compile-error-on-warn 't)
-(byte-compile-file \"bho.el\"))"
+(byte-compile-file \"orgnav.el\"))"
