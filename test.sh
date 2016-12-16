@@ -17,10 +17,9 @@ emacs -q --batch --eval "
 (progn
 (setq package-user-dir \"$elpa\")
 (require 'package)
-(add-to-list 'package-archives '(\"melpa-stable\" . \"http://stable.melpa.org/packages/\"))
-(package-initialize 't)
-(list-packages) ;; needed to update package list
+(add-to-list 'package-archives '(\"melpa-stable\" . \"http://stable.melpa.org/packages/\") t)
+(package-initialize)
+(package-refresh-contents)
 (package-install-file \"bho.el\")
 (setq byte-compile-error-on-warn 't)
-(byte-compile-file \"bho.el\")
-)"
+(byte-compile-file \"bho.el\"))"
