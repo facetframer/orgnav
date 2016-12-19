@@ -40,6 +40,7 @@
 (defvar orgnav-refile-depth 2 "The number of levels to show when refiling.")
 (defvar orgnav-clock-depth 2 "The number of levels to show when clocking in.")
 (defvar orgnav-clock-buffer nil "The buffer to search when clocking in.")
+(defvar orgnav-search-history nil "List of orgnav searches.")
 
 (defvar orgnav-mapping
   (let ((map (make-sparse-keymap)))
@@ -59,6 +60,7 @@
     (define-key map (kbd "M-c") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--clock-action)))
     (define-key map (kbd "M-a") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--explore-ancestors-action)))
     (define-key map (kbd "M-n") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--new-action)))
+    (define-key map (kbd "M-b") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--back-action)))
     (define-key map (kbd "M-j") 'helm-next-line)
     (define-key map (kbd "M-k") 'helm-previous-line)
     map)
@@ -292,6 +294,8 @@ PLIST is a property list of *mandatory* values:
 `:default-action' is the function to run on carriage return.
 `:helm-buffer-name' is name of the helm buffer (relvant for `helm-resume').
 `:input' is the initial search term"
+  (push plist orgnav-search-history)
+
   (let (candidate-func point depth default-action helm-buffer-name input)
     (when (not (orgnav--set-eq
               (orgnav--plist-keys plist)
@@ -356,6 +360,7 @@ by default run DEFAULT-ACTION when return pressed."
     (cons "Default action" default-action)
     (cons "Decrease depth `M-h`" 'orgnav--decrease-depth-action)
     (cons "Increase depth `M-l`" 'orgnav--increase-depth-action)
+    (cons "Go back `M-b`" 'orgnav--back-action)
     (cons "Explore node `M-.`" 'orgnav--explore-action)
     (cons "Explore parent `M-,`" 'orgnav--explore-parent-action)
     (cons "Create a new node `M-n`" 'orgnav--new-action)
@@ -439,6 +444,13 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
    :depth orgnav--var-default-action
    :helm-buffer-name orgnav--var-helm-buffer))
 
+(defun orgnav--back-action (ignored)
+  "Go the the previous orgnav search view. IGNORED is ignored"
+  (orgnav--log "Action: Go back")
+  (orgnav--log "orgnav--back-action: search history %S" orgnav-search-history)
+  (pop orgnav-search-history)
+  (apply 'orgnav--search (pop orgnav-search-history)))
+
 (defun orgnav--explore-parent-action (ignored)
   "Start search again from one level higher.  Ignore IGNORED."
   (orgnav--log "Action: explore parent of search at %S"
@@ -517,6 +529,7 @@ The original entry is kept unlike `orgnav--refile-to-action'."
   (set-marker orgnav--var-last-refile-mark helm-entry)
   (org-refile 3 nil (list nil buffer-file-name nil helm-entry)))
 
+
 ;;; Utility functions
 (defun orgnav--get-parent (point)
   "Get the parent of the node at POINT."
@@ -586,6 +599,11 @@ The original entry is kept unlike `orgnav--refile-to-action'."
 (defun orgnav--get-input ()
   "Get the current input of the helm search."
   helm-input)
+
+(defun orgnav--reload ()
+  (interactive)
+  (unload-feature 'orgnav)
+  (require 'orgnav))
 
 (provide 'orgnav)
 ;;; orgnav.el ends here
