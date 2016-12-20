@@ -1,1 +1,4 @@
 *.elc
+.cask
+elpa
+dist

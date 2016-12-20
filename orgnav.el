@@ -5,11 +5,6 @@
 ;; Author: Facet Framer (facet@facetframer.com)
 ;; URL: github.com/facetframer/orgnav
 
-;; Version: 0.1.0
-;; Package-Version: 20161028.1
-;; Package-Requires: ((helm "1.5.5") (dash) (s))
-;; Created October 2016
-
 ;; Keywords: org tree navigation
 
 ;; This program is free software; you can redistribute it and/or modify
@@ -31,15 +26,13 @@
 ;;; Code:
 
 (require 'helm)
-(require 'helm-org)
 (require 's)
 (require 'dash)
 (require 'cl-seq)
+(require 'orgnav-tree)
 
 (defvar orgnav-log nil "Whether orgnav should log.")
-(defvar orgnav-refile-depth 2 "The number of levels to show when refiling.")
-(defvar orgnav-clock-depth 2 "The number of levels to show when clocking in.")
-(defvar orgnav-clock-buffer nil "The buffer to search when clocking in.")
+
 (defvar orgnav-search-history nil "List of orgnav searches.")
 
 (defvar orgnav-mapping
@@ -74,8 +67,6 @@
 (defvar orgnav--var-helm-buffer nil "Private state.  Name of the helm buffer.")
 (defvar orgnav--var-point nil "Private state.  Point of tree to start searching.")
 (defvar orgnav--var-result nil "Private state.  Variable to store the result of synchronous calls.")
-(defvar orgnav--var-last-refile-mark nil "Private state.")
-
 
 ;;; Interactive entry points for searching:
 (defun orgnav-search-root (depth default-action)
@@ -132,79 +123,6 @@ PLIST is a property list with the following values
      :helm-buffer-name helm-buffer-name
      :input input)))
 
-
-;;; Interactive entry points for refiling
-(defun orgnav-refile (source-point target-point)
-  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively."
-  (interactive (list nil nil))
-  (save-excursion
-    (if (not (null source-point))
-        (goto-char source-point))
-    (orgnav-search-subtree target-point
-                        :depth orgnav-refile-depth
-                        :default-action 'orgnav--refile-to-action
-                        :helm-buffer-name "*orgnav refile*")))
-
-(defun orgnav-refile-keep (source-point target-point)
-  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively."
-  (interactive (list nil nil))
-  (save-excursion
-    (if (not (null source-point))
-        (goto-char source-point))
-    (orgnav-search-subtree target-point
-                        :depth orgnav-refile-depth
-                        :default-action 'orgnav--refile-keep-to-action
-                        :helm-buffer-name "*orgnav refile*")))
-
-(defun orgnav-refile-ancestors (source-point target-point)
-  "Refile the node at SOURCE-POINT to an ancestor of the node at TARGET-POINT interactively."
-  (interactive (list nil nil))
-  (save-excursion
-    (if (not (null source-point))
-        (goto-char source-point))
-    (orgnav-search-ancestors target-point
-                          :default-action 'orgnav--refile-to-action
-                          :helm-buffer-name "*orgnav refile*")))
-
-(defun orgnav-refile-nearby (&optional levels-up keep)
-  "Refile nearby the current point.  Go up LEVELS-UP.  If KEEP keep the original entry."
-  (interactive)
-  (let* (
-         (up-levels (or levels-up 3))
-         (refile-function (if keep 'orgnav-refile 'orgnav-refile-keep)))
-    (funcall refile-function (point) (save-excursion (org-back-to-heading) (outline-up-heading up-levels t) (point)))))
-
-(defun orgnav-refile-again ()
-  "Refile to the location last selected by `orgnav-refile'."
-  (interactive)
-  (if (null orgnav--var-last-refile-mark)
-      (error 'no-last-run))
-  (orgnav--refile-to-action (marker-position orgnav--var-last-refile-mark))
-  (save-excursion
-     (goto-char orgnav--var-last-refile-mark)
-     (org-no-properties (org-get-heading))))
-
-
-;;; Interactive entry points for clocking
-(defun orgnav-clock-in (buffer node-point)
-  "Clock in to a node in an org buffer BUFFER, starting searching in descendents of NODE-POINT."
-  (interactive (list orgnav-clock-buffer nil))
-  (save-excursion
-    (if (not (null buffer))
-        (set-buffer buffer))
-    (orgnav-search-subtree node-point
-                        :depth orgnav-clock-depth
-                        :default-action 'orgnav--clock-action
-                        :helm-buffer-name "*orgnav-clock-in*")))
-
-(defun orgnav-search-clocking ()
-  "Start a search relative to the currently clocking activity."
-  (interactive)
-  (save-excursion
-    (org-clock-goto)
-    (orgnav-search-ancestors)))
-
-
 ;;; Functions that you might want to script
 (defun orgnav-jump-interactive (base-filename base-heading)
   "Jump to an ancestor for a heading in BASE-FILENAME called BASE-HEADING."
@@ -247,44 +165,6 @@ Start searching in the buffer called HELM-BUFFER-NAME."
   (setq orgnav--var-result nil)))
 
 
-(defun orgnav-capture-function-global ()
-  "A function that can be used with `org-capture-template'.
-A *file+function* or *function* capture point to capture to
-a location selected using orgnav under the root node.
-Here is an example entry:
-        `(\"*\" \"Create a new entry\" entry
-              (file+function \"test.org\" orgnav-capture-function-global) \"** Title\")'"
-  (goto-char (orgnav-search-subtree-sync nil
-                                      :depth orgnav-refile-depth
-                                      :helm-buffer-name "*orgnav-capture*")))
-
-(defun orgnav-capture-function-relative ()
-  "A function that can be used with `org-capture-template'.
-A *function* capture point to capture to a location under
-the current node selected using orgnav.
-Here is an example entry:
-        `(\"*\" \"Create a new entry\" entry
-               (function orgnav-capture-function-relative) \"** Title\")'"
-  (goto-char (orgnav-search-subtree-sync
-              (save-excursion
-                (outline-back-to-heading 't)
-                (point))
-              :depth orgnav-refile-depth
-              :helm-buffer-name "*orgnav-capture*")))
-
-(defun orgnav-capture-function-ancestors ()
-  "A function that can be used with `org-capture-template'.
-A *function* capture point'to capture to a ancestor
-of the current node.
-Here is an example entry:
-        (\"*\" \"Create a new entry\" entry (function orgnav-capture-function-ancestor) \"** Title\")"
-  (goto-char (orgnav-search-ancestors-sync
-              (save-excursion
-                (outline-back-to-heading 't)
-                (point))
-              "*orgnav-capture*")))
-
-
 ;; Private functions
 (defun orgnav--search (&rest plist)
   "Generic search function.
@@ -320,7 +200,7 @@ PLIST is a property list of *mandatory* values:
     (orgnav--log "orgnav--search candidate-func=%S action=%S header=%S depth=%S input=%S"
               candidate-func
               orgnav--var-default-action
-              (orgnav--get-heading orgnav--var-buffer orgnav--var-point)
+              (orgnav-tree-get-heading orgnav--var-buffer orgnav--var-point)
               orgnav--var-depth
               input)
     (helm
@@ -336,24 +216,6 @@ PLIST is a property list of *mandatory* values:
          (apply 'orgnav--plist-update
           (car orgnav-search-history)
           tweaks)))
-
-(defun orgnav--ancestors (&optional point)
-  "Find the ancestors of the current org node."
-  (save-excursion
-    (when point (goto-char point))
-    (outline-back-to-heading 't)
-    (cons (point) (orgnav--ancestors-rec))))
-
-(defun orgnav--ancestors-rec ()
-  "Convenience function used by `orgnav--ancestors'."
-  (if
-      (condition-case nil
-          (progn
-            (outline-up-heading 1 't)
-            't)
-        (error nil))
-      (cons (point) (orgnav--ancestors-rec))
-    nil))
 
 (defun orgnav--make-source (candidate-func default-action)
   "Make helm source which gets candidates by calling CANDIDATE-FUNC.
@@ -398,7 +260,7 @@ by default run DEFAULT-ACTION when return pressed."
                   (goto-char orgnav--var-point)
                   (org-outline-level)))))
          (orgnav--filter-by-depth
-          (orgnav--get-descendants orgnav--var-point)
+          (orgnav-tree-get-descendants orgnav--var-point)
           current-level (+ current-level orgnav--var-depth)))))))
 
 (defun orgnav--get-ancestor-candidates ()
@@ -408,7 +270,7 @@ by default run DEFAULT-ACTION when return pressed."
       (if orgnav--var-point
           (goto-char orgnav--var-point))
       (mapcar 'orgnav--make-candidate
-              (orgnav--ancestors)))))
+              (orgnav-tree-ancestors)))))
 
 (defun orgnav--get-entry-str (point)
   "How orgnav should represent a the node at POINT."
@@ -466,7 +328,7 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
   (orgnav--log "Action: explore parent of search at %S"
             orgnav--var-point)
   (orgnav--tweak-search
-   :point (orgnav--get-parent orgnav--var-point)
+   :point (orgnav-tree-get-parent orgnav--var-point)
    :depth 1))
 
 (defun orgnav--increase-depth-action (ignored)
@@ -508,7 +370,7 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
           (read-string "New name" (save-excursion
                               (goto-char helm-entry)
                               (org-get-heading))))
-    (orgnav--rename helm-entry heading)
+    (orgnav-tree-rename helm-entry heading)
     (orgnav-search-subtree orgnav--var-point
                         :depth orgnav--var-depth
                         :default-action orgnav--var-default-action
@@ -522,67 +384,7 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
     (goto-char helm-entry)
     (org-clock-in)))
 
-(defun orgnav--refile-to-action (helm-entry)
-  "Action used by `orgnav-refile` to refile to the selected entry HELM-ENTRY."
-  (orgnav--log "Action: refiling %S to %S" (point) helm-entry)
-  (setq orgnav--var-last-refile-mark (make-marker))
-  (set-marker orgnav--var-last-refile-mark helm-entry)
-  (org-refile nil nil (list nil buffer-file-name nil helm-entry)))
-
-(defun orgnav--refile-keep-to-action (helm-entry)
-  "Action used by `orgnav-refile-keep` to refile to a selected HELM-ENTRY.
-The original entry is kept unlike `orgnav--refile-to-action'."
-  (orgnav--log "Action: refiling %S to %S" (point) helm-entry)
-  (setq orgnav--var-last-refile-mark (make-marker))
-  (set-marker orgnav--var-last-refile-mark helm-entry)
-  (org-refile 3 nil (list nil buffer-file-name nil helm-entry)))
-
-
-
 ;;; Utility functions
-(defun orgnav--get-parent (point)
-  "Get the parent of the node at POINT."
-  (save-excursion
-    (goto-char point)
-    (condition-case nil
-        (progn
-          (outline-up-heading 1 t)
-          (point))
-      (error nil))))
-
-(defun orgnav--get-heading (buffer point)
-  "Get the heading of an org element in BUFFER at POINT."
-  (with-current-buffer buffer
-    (save-excursion
-      (setq point (or point (point)))
-      (progn
-        (goto-char point)
-        (substring-no-properties (org-get-heading))))))
-
-(defun orgnav--get-descendants (tree)
-  "Get the positions of all the headings under the tree at TREE."
-  (interactive)
-  (let ((result))
-    (save-excursion
-      (if (not (null tree)) (goto-char tree))
-      (if
-          (null tree)
-          (org-map-region (lambda () (add-to-list 'result (point) 't)) (point-min) (point-max))
-        (org-map-tree (lambda () (add-to-list 'result (point) 't)))))
-    result))
-
-(defun orgnav--rename (point name)
-  "Rename the node at POINT to NAME."
-  (let (new-heading)
-    (save-excursion
-      (goto-char point)
-      (setq new-heading
-            (concat (s-repeat (org-outline-level) "*") " " name))
-
-      (beginning-of-line)
-      (kill-line)
-      (insert new-heading))))
-
 (defun orgnav--log (format-string &rest args)
   "Print logging depending of ORGNAV-LOG variable.  FORMAT-STRING  and ARGS have the same meanings as message."
   (when orgnav-log
@@ -626,8 +428,8 @@ The original entry is kept unlike `orgnav--refile-to-action'."
 (defun orgnav--format-path (point)
   (substring-no-properties
    (s-join "\n" (mapcar
-                 (lambda (point) (orgnav--get-heading orgnav--var-buffer point))
-                 (orgnav--ancestors point)))))
+                 (lambda (point) (orgnav-tree-get-heading orgnav--var-buffer point))
+                 (orgnav-tree-ancestors point)))))
 
 (defun orgnav--popup (message)
   "Show MESSAGE in a popup window."
