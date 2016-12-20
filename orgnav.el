@@ -61,6 +61,7 @@
     (define-key map (kbd "M-a") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--explore-ancestors-action)))
     (define-key map (kbd "M-n") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--new-action)))
     (define-key map (kbd "M-b") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--back-action)))
+  (define-key map (kbd "M-v") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--show-path-action)))
     (define-key map (kbd "M-j") 'helm-next-line)
     (define-key map (kbd "M-k") 'helm-previous-line)
     map)
@@ -300,7 +301,7 @@ PLIST is a property list of *mandatory* values:
     (when (not (orgnav--set-eq
               (orgnav--plist-keys plist)
               (list :candidate-func :point :depth :default-action :helm-buffer-name :input)))
-      (error "Wrong keys"))
+      (error "Wrong keys: %S" (orgnav--plist-keys plist)))
     (setq candidate-func (plist-get plist :candidate-func))
     (setq point (plist-get plist :point))
     (setq depth (plist-get plist :depth))
@@ -329,9 +330,17 @@ PLIST is a property list of *mandatory* values:
      :buffer helm-buffer-name
      :input input)))
 
-(defun orgnav--ancestors ()
+(defun orgnav--tweak-search (&rest tweaks)
+  "Repeat the previous search with some TWEAKS."
+  (apply 'orgnav--search
+         (apply 'orgnav--plist-update
+          (car orgnav-search-history)
+          tweaks)))
+
+(defun orgnav--ancestors (&optional point)
   "Find the ancestors of the current org node."
   (save-excursion
+    (when point (goto-char point))
     (outline-back-to-heading 't)
     (cons (point) (orgnav--ancestors-rec))))
 
@@ -360,6 +369,7 @@ by default run DEFAULT-ACTION when return pressed."
     (cons "Default action" default-action)
     (cons "Decrease depth `M-h`" 'orgnav--decrease-depth-action)
     (cons "Increase depth `M-l`" 'orgnav--increase-depth-action)
+    (cons "View path `M-v`" 'orgnav--show-path-action)
     (cons "Go back `M-b`" 'orgnav--back-action)
     (cons "Explore node `M-.`" 'orgnav--explore-action)
     (cons "Explore parent `M-,`" 'orgnav--explore-parent-action)
@@ -441,7 +451,7 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
   (orgnav--log "Action: explore ancestors of %S" helm-entry)
   (orgnav-search-ancestors
    helm-entry
-   :depth orgnav--var-default-action
+   :default-action orgnav--var-default-action
    :helm-buffer-name orgnav--var-helm-buffer))
 
 (defun orgnav--back-action (ignored)
@@ -455,28 +465,26 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
   "Start search again from one level higher.  Ignore IGNORED."
   (orgnav--log "Action: explore parent of search at %S"
             orgnav--var-point)
-  (orgnav-search-subtree (orgnav--get-parent orgnav--var-point)
-                      :depth 1
-                      :default-action orgnav--var-default-action
-                      :helm-buffer-name orgnav--var-helm-buffer))
+  (orgnav--tweak-search
+   :point (orgnav--get-parent orgnav--var-point)
+   :depth 1))
 
 (defun orgnav--increase-depth-action (ignored)
   "Search again showing nodes at a greater depth.  IGNORED is ignored."
   (orgnav--log "Action: Increasing depth of search")
-  (orgnav-search-subtree orgnav--var-point
-                      :depth (+ orgnav--var-depth 1)
-                      :default-action orgnav--var-default-action
-                      :helm-buffer-name orgnav--var-helm-buffer
-                      :input (orgnav--get-input)))
+  (orgnav--tweak-search :depth (max (+ orgnav--var-depth 1) 1)))
 
 (defun orgnav--decrease-depth-action (ignored)
   "Search again hiding more descendents.  IGNORED is ignored."
   (orgnav--log "Action: decrease depth of search")
-  (orgnav-search-subtree orgnav--var-point
-                      :depth (max (- orgnav--var-depth 1) 1)
-                      :default-action orgnav--var-default-action
-                      :helm-buffer-name orgnav--var-helm-buffer
-                      :input (orgnav--get-input)))
+  (orgnav--tweak-search :depth (max (- orgnav--var-depth 1) 1)))
+
+(defun orgnav--show-path-action (helm-entry)
+  "Show the path to this HELM-ENTRY."
+  (orgnav--log "Action: showing path to %S" helm-entry)
+  (orgnav--popup
+   (orgnav--format-path helm-entry))
+  (orgnav--tweak-search :input (orgnav--get-input)))
 
 (defun orgnav--new-action (helm-entry)
   "Create child under the select HELM-ENTRY.  IGNORED is ignored."
@@ -530,6 +538,7 @@ The original entry is kept unlike `orgnav--refile-to-action'."
   (org-refile 3 nil (list nil buffer-file-name nil helm-entry)))
 
 
+
 ;;; Utility functions
 (defun orgnav--get-parent (point)
   "Get the parent of the node at POINT."
@@ -545,10 +554,10 @@ The original entry is kept unlike `orgnav--refile-to-action'."
   "Get the heading of an org element in BUFFER at POINT."
   (with-current-buffer buffer
     (save-excursion
-      (or (point)
-          (progn
-            (goto-char point)
-            (substring-no-properties (org-get-heading)))))))
+      (setq point (or point (point)))
+      (progn
+        (goto-char point)
+        (substring-no-properties (org-get-heading))))))
 
 (defun orgnav--get-descendants (tree)
   "Get the positions of all the headings under the tree at TREE."
@@ -604,6 +613,32 @@ The original entry is kept unlike `orgnav--refile-to-action'."
   (interactive)
   (unload-feature 'orgnav)
   (require 'orgnav))
+
+(defun orgnav--plist-update (plist &rest update-plist)
+  (let (result)
+    (setq result plist)
+    (mapc
+     (lambda (key)
+       (setq result (plist-put result key (plist-get update-plist key))))
+     (orgnav--plist-keys update-plist))
+    result))
+
+(defun orgnav--format-path (point)
+  (substring-no-properties
+   (s-join "\n" (mapcar
+                 (lambda (point) (orgnav--get-heading orgnav--var-buffer point))
+                 (orgnav--ancestors point)))))
+
+(defun orgnav--popup (message)
+  "Show MESSAGE in a popup window."
+  ;; Helm breaks the mini-buffer
+  (let (popup-buffer)
+    (setq popup-buffer (get-buffer-create "*orgnav-popup*"))
+    (with-current-buffer popup-buffer
+      (erase-buffer)
+      (insert message))
+    (display-buffer popup-buffer))
+  (read-char "Press a key when finished:"))
 
 (provide 'orgnav)
 ;;; orgnav.el ends here
