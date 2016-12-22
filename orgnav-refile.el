@@ -63,7 +63,7 @@
   (interactive)
   (let* (
          (up-levels (or levels-up 3))
-         (refile-function (if keep 'orgnav-refile 'orgnav-refile-keep)))
+         (refile-function (if keep 'orgnav-refile-keep 'orgnav-refile)))
     (funcall refile-function (point) (save-excursion (org-back-to-heading) (outline-up-heading up-levels t) (point)))))
 
 (defun orgnav-refile-again ()
