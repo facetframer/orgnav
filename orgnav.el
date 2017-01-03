@@ -124,13 +124,14 @@ PLIST is a property list with the following values
      :input input)))
 
 ;;; Functions that you might want to script
-(defun orgnav-jump-interactive (base-filename base-heading)
+(defun orgnav-jump-interactive (base-filename base-heading &optional depth)
   "Jump to an ancestor for a heading in BASE-FILENAME called BASE-HEADING."
+  (setq depth (or depth 2))
   (if (not (null base-filename)) (find-file base-filename))
   (orgnav--goto-action
    (orgnav-search-subtree-sync
     (and base-heading (org-find-exact-headline-in-buffer base-heading))
-    :depth 2)))
+    :depth depth)))
 
 (defun orgnav-search-subtree-sync (point &rest plist)
   "Search the tree at POINT.  Return the `(point)' at the selected node.
