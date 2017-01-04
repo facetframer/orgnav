@@ -28,11 +28,15 @@
 
 (defun orgnav-tree-get-parent (point)
   "Get the parent of the node at POINT."
+  (orgnav-tree-get-ancestor point 1))
+
+(defun orgnav-tree-get-ancestor (point levels)
+  "Get the ancestor of the node at POINT, LEVELS levels up."
   (save-excursion
     (goto-char point)
     (condition-case nil
         (progn
-          (outline-up-heading 1 t)
+          (outline-up-heading levels t)
           (point))
       (error nil))))
 

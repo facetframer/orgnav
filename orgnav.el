@@ -123,6 +123,11 @@ PLIST is a property list with the following values
      :helm-buffer-name helm-buffer-name
      :input input)))
 
+(defun orgnav-search-nearby (levels)
+  "Search near the current node, LEVELS levels up."
+  (interactive (list 1))
+  (orgnav-search-subtree (orgnav-tree-get-ancestor (point) levels)))
+
 ;;; Functions that you might want to script
 (defun orgnav-jump-interactive (base-filename base-heading &optional depth)
   "Jump to an ancestor for a heading in BASE-FILENAME called BASE-HEADING."
