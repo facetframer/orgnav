@@ -31,4 +31,9 @@ cask eval "
 (byte-compile-file \"orgnav-capture.el\")
 (byte-compile-file \"orgnav-clock.el\")
 (byte-compile-file \"orgnav-refile.el\")
+(checkdoc-file \"orgnav.el\")
+(checkdoc-file \"orgnav-tree.el\")
+(checkdoc-file \"orgnav-capture.el\")
+(checkdoc-file \"orgnav-clock.el\")
+(checkdoc-file \"orgnav-refile.el\")
 )"

@@ -130,7 +130,7 @@ PLIST is a property list with the following values
 
 ;;; Functions that you might want to script
 (defun orgnav-jump-interactive (base-filename base-heading &optional depth)
-  "Jump to an ancestor for a heading in BASE-FILENAME called BASE-HEADING."
+  "Jump to an ancestor of the heading in BASE-FILENAME called BASE-HEADING.  Display DEPTH levels."
   (setq depth (or depth 2))
   (if (not (null base-filename)) (find-file base-filename))
   (orgnav--goto-action
@@ -323,7 +323,7 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
    :helm-buffer-name orgnav--var-helm-buffer))
 
 (defun orgnav--back-action (ignored)
-  "Go the the previous orgnav search view. IGNORED is ignored"
+  "Go the the previous orgnav search view.  IGNORED is ignored."
   (orgnav--log "Action: Go back")
   (orgnav--log "orgnav--back-action: search history %S" orgnav-search-history)
   (pop orgnav-search-history)
@@ -418,11 +418,17 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
   helm-input)
 
 (defun orgnav--reload ()
+  "Unload and reload orgnav."
   (interactive)
   (unload-feature 'orgnav)
-  (require 'orgnav))
+  (require 'orgnav-capture)
+  (require 'orgnav-clock)
+  (require 'orgnav)
+  (require 'orgnav-refile)
+  (require 'orgnav-tree))
 
 (defun orgnav--plist-update (plist &rest update-plist)
+  "Alter the property list PLIST by adding the key-value pairs in UPDATE-PLIST."
   (let (result)
     (setq result plist)
     (mapc
@@ -432,6 +438,7 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
     result))
 
 (defun orgnav--format-path (point)
+  "Show the path to the org heading at POINT."
   (substring-no-properties
    (s-join "\n" (mapcar
                  (lambda (point) (orgnav-tree-get-heading orgnav--var-buffer point))
@@ -447,6 +454,7 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
       (insert message))
     (display-buffer popup-buffer))
   (read-char "Press a key when finished:"))
+
 
 (provide 'orgnav)
 ;;; orgnav.el ends here

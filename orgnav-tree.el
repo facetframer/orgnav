@@ -74,7 +74,7 @@
       (insert new-heading))))
 
 (defun orgnav-tree-ancestors (&optional point)
-  "Find the ancestors of the current org node."
+  "Find the ancestors of the current org node (or the one at POINT)."
   (save-excursion
     (when point (goto-char point))
     (outline-back-to-heading 't)
