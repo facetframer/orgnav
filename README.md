@@ -94,7 +94,7 @@ org-capture.
 * Sometimes pressing keys too quickly can break `helm`.
 * The tree is based on character offsets, which can interfere with `helm-resume`. This could be addressed using *olp*s rather than offsets
 * Some of the keybindings here almost certainly shadow `helm` defaults
-* There is no testing at the moment.
+* There is very limited testing at present
 
 ## Contributing
 
