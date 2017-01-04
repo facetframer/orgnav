@@ -5,20 +5,20 @@ Built with the help of helm.
 
 ## Motivational introduction
 
-This library allows you navigate your org tree interactive with helm.
+This library allows you navigate your org tree interactively with helm.
 As an example using this library you might:
 
 * Start searching your org tree at the top-level
 * Increase the depth you are displaying a few times with `M-l`
-* Filter to tasks that are in progress by searching for INPROGRESS
-* Find a task that you are interested it using `M-j` and `M-k`
-* Look at the ancestors this task with `M-a`
+* Filter to tasks that are in progress by searching for "INPROGRESS"
+* Find a task that you are interested in using `M-j` and `M-k`
+* Look at the ancestors of this task with `M-a`
 * Find an interesting ancestor and look at all its descendents with `M-.`
 
-To get a summary for how to use this library, run `M-x orgnav-search-root` and press `TAB`
-for a list of keybindings. Using these keybindings is very much encouraged.
+To get a summary of how to use this library, run `M-x orgnav-search-root` and press `TAB`.
+This will display a list of keybindings. Using these keybindings is very much encouraged.
 
-Running `M-x orgnav<TAB>` for a list of function is advised: functions without `--`s them
+Run `M-x orgnav<TAB>` for a list of functions: functions without `--`s in them
 are public functions that you might like to call.
 
 ## Installing
@@ -34,33 +34,29 @@ to your `init.el`.
 Run some functions with `M-x`.
 
 You may well want to set up some keybindings using
-`define-key` and `global-set-key`. No defaults
-are provided since users of this library
-likely have strong opinions about such things.
+`define-key` and `global-set-key`. No defaults are provided since users
+of this library likely have strong opinions about such things.
 
 ## Debugging
 
-Try setting the orgnav-log variable and reviewing the messages buffer
+Try setting the `orgnav-log` variable and reviewing the `*Messages*` buffer:
 
 ```
 (setq orgnav-log 't)
 ```
 
-## Advanced features
+## Advanced-use features
 ### Extensibility
 Functions are moderately flexible and you can call them yourself from elisp.
-Whenever you want to find nodes to operate on from elisp this library can be useful.
-The synchronuos variants of functions are very relevant here.
+Whenever you want to find org nodes to operate on from elisp this library can be useful. The synchronuos variants of functions are very relevant here.
 
-#### Specific functionality
-The core of this library is the navigation interface that can be
-used extensibly from elisp. However, some of this extension
-has been done for you already through convenience functions.
-There are functions for:
+#### Specific-purpose convenience functions
+The core of this library is the navigation interface that can be used extensibly from elisp. However some common (or obvious) examples are included:
 
-* Clocking into items
-* Refiling
-* Use with org-capture to select where you want to capture to
+
+* Clocking into items (`orgnav-clock-in`)
+* Refiling (`orgnav-refile`, `orgnav-refile-ancestors` and friends)
+* Use with `org-capture` to select your capture target (`orgnav-capture-function-relative` and `orgnav-capture-function-global`)
 
 ## Alternatives
 
@@ -71,12 +67,12 @@ However, for simple use cases, `helm-org` may be good enough and is likely more 
 You may be able to use `narrowing` to work around some of the limitations.
 
 ### Judicious use of `org-capture`, `org-refile`, and `org-find-olp`
-Though initially slightly cryptic, for more general-purpose use cases,
-these functions are very powerful. This is particularly the case if
+Though initially slightly cryptic if you are willing to do some
+scripting these functions are very powerful. This is particularly the case if
 your workflow is quite consistent.
 
 The general purpose functionality of `orgnav` may be unnecessary for you:
-an inferior alternative to coding something for your specific workflow.
+hacking up some elisp that supports a very limited workflow might work better.
 Specifically, this is likely to be the case if you are rarely creating new nesting
 in your org file.
 
@@ -88,8 +84,8 @@ slowing down reading.
 You can avoid problems related to "losing your place" by using `clone-indirect-buffer`
 to create multiple views of your buffer.
 `org-sparse-tree` also has the benefit of allowing in-place editing.
-`helm` does not support this, but similar types of actions
-can be achieved in `orgnav` through org-capture.
+`helm` does not support this, but similar types of actions can be achieved in `orgnav` through
+org-capture.
 
 ## Caveats
 
@@ -104,7 +100,7 @@ can be achieved in `orgnav` through org-capture.
 
 Contributions are welcome.
 
-Testing helm is hard. This may prove to be an issue for accepting contributions, but I can deal with this if anyone
-actually contributes anything. It's probably possible to script helm for testing however.
+Testing helm is hard. This may prove to be an issue for accepting contributions, but I can deal with
+this if anyone actually contributes anything. It's probably possible to script helm for testing.
 
 You can do some basic linting, and ensure that installation works using `test.sh`.
