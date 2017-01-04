@@ -79,13 +79,13 @@ in your org file.
 ### org-sparse-tree
 In some ways, `org-sparse-tree` overlaps with this library, as well as providing
 a number of orthogonal searching criteria. The downsides of `org-sparse-tree` are
-that it changes the folding of you buffer, and can show a lot of intermediate nodes
+that it changes the folding of your buffer, and can show a lot of intermediate nodes
 slowing down reading.
 You can avoid problems related to "losing your place" by using `clone-indirect-buffer`
 to create multiple views of your buffer.
 `org-sparse-tree` also has the benefit of allowing in-place editing.
 `helm` does not support this, but similar types of actions can be achieved in `orgnav` through
-org-capture.
+`org-capture`.
 
 ## Caveats
 
