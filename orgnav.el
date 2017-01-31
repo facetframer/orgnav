@@ -265,9 +265,7 @@ by default run DEFAULT-ACTION when return pressed."
                 (save-excursion
                   (goto-char orgnav--var-point)
                   (org-outline-level)))))
-         (orgnav--filter-by-depth
-          (orgnav-tree-get-descendants orgnav--var-point)
-          current-level (+ current-level orgnav--var-depth)))))))
+         (orgnav-tree-get-descendants orgnav--var-point orgnav--var-depth))))))
 
 (defun orgnav--get-ancestor-candidates ()
   "Find helm candidates for the ancestors of the location set by a search function."

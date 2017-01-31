@@ -50,7 +50,7 @@
         (goto-char point)
         (substring-no-properties (org-get-heading))))))
 
-(defun orgnav-tree-get-descendants (tree)
+(defun orgnav-tree-get-descendants (tree &optional depth)
   "Get the positions of all the headings under the tree at TREE."
   (interactive)
   (let ((result))
@@ -58,8 +58,8 @@
       (if (not (null tree)) (goto-char tree))
       (if
           (null tree)
-          (org-map-region (lambda () (add-to-list 'result (point) 't)) (point-min) (point-max))
-        (org-map-tree (lambda () (add-to-list 'result (point) 't)))))
+          (orgnav-tree-buffer-map (lambda () (add-to-list 'result (point) 't)) depth)
+        (orgnav-tree-tree-map (lambda () (add-to-list 'result (point) 't)) tree depth)))
     result))
 
 (defun orgnav-tree-rename (point name)
@@ -96,7 +96,6 @@
 (defun orgnav-tree--forest-map (fun node depth)
   ;;; Adapted from org-map-region in org (GPL)
   "Call FUN for NODE, its siblings and their descendants up to DEPTH."
-
   (let ((org-ignore-region t) (finished nil))
     (when (>= depth 0)
       (save-excursion
