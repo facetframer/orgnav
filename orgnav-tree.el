@@ -25,6 +25,7 @@
 ;;; Code:
 
 (require 'org)
+(require 'orgnav-hack)
 
 (defun orgnav-tree-get-parent (point)
   "Get the parent of the node at POINT."
@@ -106,7 +107,7 @@
             (let ((child (orgnav-tree--first-child (point))))
               (when child (orgnav-tree--forest-map fun child (- depth 1)))))
           (condition-case nil
-              (outline-forward-same-level 1)
+              (orgnav-hack-outline-forward-same-level 1)
             (error (setq finished 't))))))))
 
 (defun orgnav-tree-ancestors (&optional point)
