@@ -73,6 +73,42 @@
       (kill-line)
       (insert new-heading))))
 
+(defun orgnav-tree-tree-map (fun node depth)
+  "Call FUN at NODE and all its descendants up to depth DEPTH."
+  (save-excursion
+    (goto-char node)
+    (funcall fun)
+    (let ((child (orgnav-tree--first-child node)))
+      (when child (orgnav-tree--forest-map fun child (- depth 1))))))
+
+(defun orgnav-tree-buffer-map (fun depth)
+  "Call FUN at all nodes in the current buffer up to a depth DEPTH"
+  (save-excursion
+    (orgnav-tree--goto-buffer-first)
+    (orgnav-tree--forest-map fun (point) (- depth 1))))
+
+(defun orgnav-tree--goto-buffer-first ()
+  (goto-char (point-min))
+  (when (not (outline-on-heading-p 't))
+           (outline-next-heading)))
+
+(defun orgnav-tree--forest-map (fun node depth)
+  ;;; Adapted from org-map-region in org (GPL)
+  "Call FUN for NODE, its siblings and their descendants up to DEPTH."
+
+  (let ((org-ignore-region t) (finished nil))
+    (when (>= depth 0)
+      (save-excursion
+        (goto-char node)
+        (while (not finished)
+          (funcall fun)
+          (when (> depth 0)
+            (let ((child (orgnav-tree--first-child (point))))
+              (when child (orgnav-tree--forest-map fun child (- depth 1)))))
+          (condition-case nil
+              (outline-forward-same-level 1)
+            (error (setq finished 't))))))))
+
 (defun orgnav-tree-ancestors (&optional point)
   "Find the ancestors of the current org node (or the one at POINT)."
   (save-excursion
@@ -90,6 +126,17 @@
         (error nil))
       (cons (point) (orgnav-tree--ancestors-rec))
     nil))
+
+(defun orgnav-tree--first-child (node)
+  (interactive)
+  (save-excursion
+    (goto-char node)
+    (org-back-to-heading 't)
+    (let ((level (org-outline-level)))
+      (outline-next-heading)
+      (if (<= (org-outline-level) level) nil
+        (point)))))
+
 
 (provide 'orgnav-tree)
 ;;; orgnav-tree.el ends here
