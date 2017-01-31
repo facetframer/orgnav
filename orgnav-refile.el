@@ -30,14 +30,15 @@
 (defvar orgnav-refile--last-mark nil "Private state.")
 
 ;;; Interactive entry points for refiling
-(defun orgnav-refile (source-point target-point)
+(defun orgnav-refile (source-point target-point &optional depth)
   "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively."
   (interactive (list nil nil))
+  (setq depth (or depth orgnav-refile-depth))
   (save-excursion
     (if (not (null source-point))
         (goto-char source-point))
     (orgnav-search-subtree target-point
-                        :depth orgnav-refile-depth
+                        :depth depth
                         :default-action 'orgnav-refile--action
                         :helm-buffer-name "*orgnav refile*")))
 
