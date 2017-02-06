@@ -51,7 +51,7 @@
         (substring-no-properties (org-get-heading))))))
 
 (defun orgnav-tree-get-descendants (tree &optional depth)
-  "Get the positions of all the headings under the tree at TREE."
+  "Get the positions of all the headings under the tree at TREE up to DEPTH."
   (interactive)
   (let ((result))
     (save-excursion
@@ -83,12 +83,13 @@
       (when child (orgnav-tree--forest-map fun child (- depth 1))))))
 
 (defun orgnav-tree-buffer-map (fun depth)
-  "Call FUN at all nodes in the current buffer up to a depth DEPTH"
+  "Call FUN at all nodes in the current buffer up to a depth DEPTH."
   (save-excursion
     (orgnav-tree--goto-buffer-first)
     (orgnav-tree--forest-map fun (point) (- depth 1))))
 
 (defun orgnav-tree--goto-buffer-first ()
+  "Go to the first heading in the current buffer."
   (goto-char (point-min))
   (when (not (outline-on-heading-p 't))
            (outline-next-heading)))
@@ -128,6 +129,8 @@
     nil))
 
 (defun orgnav-tree--first-child (node)
+  "Find the first child of the org tree at NODE."
+
   (interactive)
   (save-excursion
     (goto-char node)

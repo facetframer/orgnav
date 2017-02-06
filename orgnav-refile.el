@@ -31,7 +31,7 @@
 
 ;;; Interactive entry points for refiling
 (defun orgnav-refile (source-point target-point &optional depth)
-  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively."
+  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively.  Start with DEPTH levels displayed."
   (interactive (list nil nil))
   (setq depth (or depth orgnav-refile-depth))
   (save-excursion
