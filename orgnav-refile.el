@@ -69,7 +69,10 @@
   (let* (
          (up-levels (or levels-up 3))
          (refile-function (if keep 'orgnav-refile-keep 'orgnav-refile)))
-    (funcall refile-function (point) (save-excursion (org-back-to-heading) (outline-up-heading up-levels t) (point)))))
+    (funcall refile-function (point) (save-excursion
+                                       (org-back-to-heading)
+                                       (outline-up-heading (max up-levels (- (org-outline-level) 1))
+                                                           t) (point)))))
 
 (defun orgnav-refile-again ()
   "Refile to the location last selected by `orgnav-refile'."
