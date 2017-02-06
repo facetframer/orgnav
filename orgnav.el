@@ -338,12 +338,16 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 (defun orgnav--increase-depth-action (ignored)
   "Search again showing nodes at a greater depth.  IGNORED is ignored."
   (orgnav--log "Action: Increasing depth of search")
-  (orgnav--tweak-search :depth (max (+ orgnav--var-depth 1) 1)))
+  (orgnav--tweak-search
+   :depth (max (+ orgnav--var-depth 1) 1)
+   :input (orgnav--get-input)))
 
 (defun orgnav--decrease-depth-action (ignored)
   "Search again hiding more descendents.  IGNORED is ignored."
   (orgnav--log "Action: decrease depth of search")
-  (orgnav--tweak-search :depth (max (- orgnav--var-depth 1) 1)))
+  (orgnav--tweak-search
+   :depth (max (- orgnav--var-depth 1) 1)
+   :input (orgnav--get-input)))
 
 (defun orgnav--show-path-action (helm-entry)
   "Show the path to this HELM-ENTRY."
