@@ -71,7 +71,7 @@
          (refile-function (if keep 'orgnav-refile-keep 'orgnav-refile)))
     (funcall refile-function (point) (save-excursion
                                        (org-back-to-heading)
-                                       (outline-up-heading (max up-levels (- (org-outline-level) 1))
+                                       (outline-up-heading (min up-levels (- (org-outline-level) 1))
                                                            t) (point)))))
 
 (defun orgnav-refile-again ()
