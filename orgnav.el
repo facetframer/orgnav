@@ -200,7 +200,7 @@ PLIST is a property list of *mandatory* values:
     (setq orgnav--var-buffer (current-buffer))
     (setq orgnav--var-point point)
     (setq orgnav--var-depth depth)
-    (setq helm-buffer-name (or helm-buffer-name "*orgnav"))
+    (setq helm-buffer-name (or helm-buffer-name "*orgnav-search*"))
     (setq orgnav--var-default-action default-action)
 
     (orgnav--log "orgnav--search candidate-func=%S action=%S header=%S depth=%S input=%S"
@@ -422,7 +422,7 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
 (defun orgnav--reload ()
   "Unload and reload orgnav."
   (interactive)
-  (unload-feature 'orgnav)
+  (unload-feature 'orgnav 't)
   (require 'orgnav-capture)
   (require 'orgnav-clock)
   (require 'orgnav)
