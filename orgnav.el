@@ -129,14 +129,24 @@ PLIST is a property list with the following values
   (orgnav-search-subtree (orgnav-tree-get-ancestor (point) levels)))
 
 ;;; Functions that you might want to script
-(defun orgnav-jump-interactive (base-filename base-heading &optional depth)
-  "Jump to an ancestor of the heading in BASE-FILENAME called BASE-HEADING.  Display DEPTH levels."
-  (setq depth (or depth 2))
-  (if (not (null base-filename)) (find-file base-filename))
-  (orgnav--goto-action
-   (orgnav-search-subtree-sync
-    (and base-heading (org-find-exact-headline-in-buffer base-heading))
-    :depth depth)))
+(defun orgnav-jump-interactive (base-filename base-heading-spec &optional depth)
+  "Jump to an ancestor of the heading of BASE-FILENAME specified by BASE-HEADING-SPEC.  Display DEPTH levels."
+  (let (node)
+    (setq depth (or depth 2))
+    (if (not (null base-filename)) (find-file base-filename))
+    (setq node (orgnav--heading-lookup (current-buffer) base-heading-spec))
+    (orgnav--goto-action
+     (orgnav-search-subtree-sync
+      node
+      :depth depth))))
+
+(defun orgnav--heading-lookup (buffer heading-specifier)
+  (with-current-buffer buffer
+    (cond
+     ((listp heading-specifier) (org-find-olp heading-specifier t))
+     ((stringp heading-specifier) (org-find-exact-headline-in-buffer heading-specifier))
+     ((markerp heading-specifier) heading-specifier)
+     ((integerp heading-specifier) heading-specifier))))
 
 (defun orgnav-search-subtree-sync (point &rest plist)
   "Search the tree at POINT.  Return the `(point)' at the selected node.
