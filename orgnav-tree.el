@@ -97,18 +97,38 @@
 (defun orgnav-tree--forest-map (fun node depth)
   ;;; Adapted from org-map-region in org (GPL)
   "Call FUN for NODE, its siblings and their descendants up to DEPTH."
-  (let ((org-ignore-region t) (finished nil))
-    (when (>= depth 0)
-      (save-excursion
-        (goto-char node)
-        (while (not finished)
-          (funcall fun)
-          (when (> depth 0)
-            (let ((child (orgnav-tree--first-child (point))))
-              (when child (orgnav-tree--forest-map fun child (- depth 1)))))
-          (condition-case nil
-              (orgnav-hack-outline-forward-same-level 1)
-            (error (setq finished 't))))))))
+  (mapcar (lambda (marker)
+            (goto-char marker)
+            (funcall fun))
+          (orgnav-tree--mark-nodes node depth)))
+
+(defun orgnav-tree--mark-nodes (node depth)
+  (let (result)
+    (orgnav-tree--forest-map-raw
+     (lambda ()  (add-to-list 'result (point-marker)))
+     node
+     depth)
+    (reverse result)))
+
+(defun orgnav-tree--forest-map-raw (fun node depth)
+  ;;; Adapted from org-map-region in org (GPL)
+  "Call FUN for NODE, its siblings and their descendants up to DEPTH. Does not deal with modification"
+  (orgnav--log "(orgnav-tree--forest-map-raw %S %S %S)" fun node depth)
+  (lexical-let ((finished nil))
+    (let ((org-ignore-region t))
+      (when (>= depth 0)
+        (save-excursion
+          (goto-char node)
+          (while (not finished)
+            (funcall fun)
+            (when (> depth 0)
+              (let ((child (orgnav-tree--first-child (point))))
+                (when child (orgnav-tree--forest-map-raw fun child (- depth 1)))))
+            (condition-case nil
+                (orgnav-hack-outline-forward-same-level 1)
+              (orgnav-last-error
+               (setq finished 't)))))))))
+
 
 (defun orgnav-tree-ancestors (&optional point)
   "Find the ancestors of the current org node (or the one at POINT)."

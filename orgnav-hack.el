@@ -22,6 +22,8 @@
 ;;; Commentary:
 ;;
 
+(define-error 'orgnav-last-error "No more children")
+
 ;;; Code:
 (defun orgnav-hack-outline-forward-same-level (arg)
   ;;; from outline.el ( fix a bug where this fails
@@ -38,7 +40,7 @@
 	    (setq arg (1- arg)))
 	(progn
 	  (setq arg 0)
-	  (error "No following same-level heading"))))))
+	  (signal 'orgnav-last-error "No following same-level heading"))))))
 
 (defun orgnav-hack--outline-get-next-sibling ()
   ;;; Stolen from outline to work around bug
