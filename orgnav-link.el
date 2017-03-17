@@ -60,10 +60,6 @@
 
 
 
-(provide 'orgnav-link)
-
-
-
 
 (provide 'orgnav-link)
 
