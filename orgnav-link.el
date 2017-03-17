@@ -19,42 +19,52 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
 ;;; Commentary:
 ;;
 
 ;;; Code:
 
-(defvar orgnav-link-depth 3 "How many levels to display when creating links")
+(defvar orgnav-link-depth 3 "How many levels to display when creating links.")
 
 (defun orgnav-link-new (point &optional depth)
-  "Insert link to a child of POINT.  If POINT is nil search the entire buffer."
+  "Insert link to a child of POINT.  If POINT is nil search the entire buffer.  Show DEPTH levels."
   (interactive (list nil))
-  (orgnav-link--insert (orgnav-link--get-custom-id (orgnav-search-subtree-sync point :depth (or depth orgnav-link-depth)))))
+  (orgnav-link--insert (orgnav-link--get-set-custom-id (orgnav-search-subtree-sync point :depth (or depth orgnav-link-depth)))))
 
 (defun orgnav-link--insert (custom-id)
-  (insert (format "[[%s]]" custom-id)))
+  "Insert a new link to the node with the property CUSTOM-ID."
+  (insert (format "[[#%s]]" custom-id)))
 
-(defun orgnav-link--get-custom-id (point)
-  (message (format "Getting custom id for %S" point))
+(defun orgnav-link--get-set-custom-id (point)
+  "Get (or set and get) the custom id property for the node at POINT."
+  (orgnav--log "Getting custom id for %S" point)
   (let (custom-id)
     (save-excursion
       (goto-char point)
       (setq custom-id (org-entry-get point "CUSTOM_ID" nil))
       (when (null custom-id)
-        (setq custom-id (orgnav-link--new-custom-id))
+        (setq custom-id (orgnav-link--new-custom-id (org-get-heading 't)))
         (org-set-property "CUSTOM_ID" custom-id))
       custom-id)))
 
-(defun orgnav-link--new-custom-id ()
+(defun orgnav-link--new-custom-id (string)
+  "Create unique custom id containing STRING."
   (save-excursion
-    (org-back-to-heading)
-    (message (format "Build customing link at %S" (point)))
+    (orgnav--log "Build customing link at %S" (point))
+    (substring-no-properties
+     (s-concat
+      (s-replace " " "-" string)
+      "-"
+      (format-time-string "%s-")
+      (format "%s" (random 10000))))))
 
-    (substring-no-properties (s-concat (s-replace " " "-" (org-get-heading 't)) "-" (format-time-string "%s-") (format "%s" (random 10000))))))
 
 
 (provide 'orgnav-link)
 
 
 
+
+(provide 'orgnav-link)
+
+;;; orgnav-link.el ends here
