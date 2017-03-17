@@ -30,17 +30,16 @@
 (defvar orgnav-refile--last-mark nil "Private state.")
 
 ;;; Interactive entry points for refiling
-(defun orgnav-refile (source-point target-point &optional depth)
+(defun orgnav-refile (source-point target-point &rest options)
   "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively.  Start with DEPTH levels displayed."
   (interactive (list nil nil))
-  (setq depth (or depth orgnav-refile-depth))
+  (setq options (orgnav--plist-update options :depth (or (plist-get options :depth) orgnav-refile-depth)))
+  (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action :helm-buffer-name "*orgnav refile*"))
+
   (save-excursion
     (if (not (null source-point))
         (goto-char source-point))
-    (orgnav-search-subtree target-point
-                        :depth depth
-                        :default-action 'orgnav-refile--action
-                        :helm-buffer-name "*orgnav refile*")))
+    (apply 'orgnav-search-subtree target-point options)))
 
 (defun orgnav-refile-keep (source-point target-point)
   "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively."
@@ -63,16 +62,18 @@
                           :default-action 'orgnav-refile--action
                           :helm-buffer-name "*orgnav refile*")))
 
-(defun orgnav-refile-nearby (&optional levels-up keep)
+(defun orgnav-refile-nearby (&optional levels-up keep &rest settings)
   "Refile nearby the current point.  Go up LEVELS-UP.  If KEEP keep the original entry."
   (interactive)
   (let* (
          (up-levels (or levels-up 3))
-         (refile-function (if keep 'orgnav-refile-keep 'orgnav-refile)))
-    (funcall refile-function (point) (save-excursion
-                                       (org-back-to-heading)
-                                       (outline-up-heading (min up-levels (- (org-outline-level) 1))
-                                                           t) (point)))))
+         (refile-function (if keep 'orgnav-refile-keep 'orgnav-refile))
+         (node))
+    (setq node (save-excursion
+                 (org-back-to-heading)
+                 (outline-up-heading (min up-levels (- (org-outline-level) 1))
+                                     t) (point)))
+    (apply refile-function (point) node settings)))
 
 (defun orgnav-refile-again ()
   "Refile to the location last selected by `orgnav-refile'."
