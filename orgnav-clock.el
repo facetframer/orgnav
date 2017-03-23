@@ -30,16 +30,26 @@
 (defvar orgnav-clock-depth 2 "How many levels to show for clock operations.")
 
 ;;; Interactive entry points for clocking
-(defun orgnav-clock-in (buffer node-point)
-  "Clock in to a node in an org buffer BUFFER, starting searching in descendents of NODE-POINT."
+(defun orgnav-clock-in (&rest properties)
+  "Clock in to a node. PROPERTIES is plist which can include the optional keys :buffer :node"
   (interactive (list orgnav-clock-buffer nil))
-  (save-excursion
-    (if (not (null buffer))
-        (set-buffer buffer))
-    (orgnav-search-subtree node-point
-                        :depth orgnav-clock-depth
-                        :default-action 'orgnav--clock-action
-                        :helm-buffer-name "*orgnav-clock-in*")))
+  (orgnav--assert-plist properties :depth :node :buffer)
+  (let (buffer node-point)
+    (setq buffer (or (plist-get properties :buffer) (current-buffer)))
+    (setq node-point (plist-get properties :node))
+    (setq depth (or (plist-get properties :depth) orgnav-clock-depth))
+    (with-current-buffer buffer
+      (save-excursion
+        (orgnav-search-subtree node-point
+                               :depth depth
+                               :default-action 'orgnav--clock-action
+                               :helm-buffer-name "*orgnav-clock-in*")))))
+
+(defun orgnav-clock-in-point (&rest properties)
+  "Convenience function to clock into a child of the current node. PROPERTIES is a plist."
+  (interactive)
+  (apply 'orgnav-clock-in (plist-put properties :node (point))))
+
 
 (defun orgnav-search-clocking ()
   "Start a search relative to the currently clocking activity."
