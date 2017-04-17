@@ -41,16 +41,16 @@
         (goto-char source-point))
     (apply 'orgnav-search-subtree target-point options)))
 
-(defun orgnav-refile-keep (source-point target-point)
-  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively."
+(defun orgnav-refile-keep (source-point target-point &rest options)
+  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively while retaining original node."
   (interactive (list nil nil))
+  (setq options (orgnav--plist-update options :depth (or (plist-get options :depth) orgnav-refile-depth)))
+  (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action-keep :helm-buffer-name "*orgnav refile*"))
+
   (save-excursion
     (if (not (null source-point))
         (goto-char source-point))
-    (orgnav-search-subtree target-point
-                        :depth orgnav-refile-depth
-                        :default-action 'orgnav-refile--action-keep
-                        :helm-buffer-name "*orgnav refile*")))
+    (apply 'orgnav-search-subtree target-point options)))
 
 (defun orgnav-refile-ancestors (source-point target-point)
   "Refile the node at SOURCE-POINT to an ancestor of the node at TARGET-POINT interactively."
