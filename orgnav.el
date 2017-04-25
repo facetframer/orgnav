@@ -82,22 +82,25 @@ Display DEPTH levels.  Run DEFAULT-ACTION on enter."
   "Explore the org subtree at POINT.  If POINT is nil explore the buffer.
 This function returns immediately.
 PLIST is a property list with optional properties:
-:depth how levels are shown.
-:default-action the action run on enter (goto pont by default)
-:helm-buffer-name the name of the helm search buffer (of use with `helm-resume')."
+`:depth' how levels are shown.
+`:default-action' the action run on enter (goto pont by default)
+`:buffer' is the buffer that you should search in
+`:helm-buffer-name' the name of the helm search buffer (of use with `helm-resume')."
   (interactive (list (point)))
-  (orgnav--assert-plist plist :depth :default-action :helm-buffer-name :input)
-  (let (depth default-action helm-buffer-name input)
+  (orgnav--assert-plist plist :depth :default-action :helm-buffer-name :input :buffer)
+  (let (depth default-action helm-buffer-name input buffer)
     (setq depth (plist-get plist :depth))
     (setq default-action (plist-get plist :default-action))
     (setq helm-buffer-name (plist-get plist :helm-buffer-name))
     (setq input (plist-get plist :input))
     (setq depth (or depth 1))
     (setq default-action (or default-action 'orgnav--goto-action))
+    (setq buffer (or (plist-get plist :buffer) (current-buffer)))
     (orgnav--search
      :candidate-func 'orgnav--get-desc-candidates
      :point point
      :depth depth
+     :buffer buffer
      :default-action default-action
      :helm-buffer-name helm-buffer-name
      :input input)))
@@ -119,6 +122,7 @@ PLIST is a property list with the following values
      :candidate-func 'orgnav--get-ancestor-candidates
      :point node
      :depth nil
+     :buffer buffer
      :default-action default-action
      :helm-buffer-name helm-buffer-name
      :input input)))
@@ -190,13 +194,14 @@ PLIST is a property list of *mandatory* values:
 `:depth' is how many levels to display.
 `:default-action' is the function to run on carriage return.
 `:helm-buffer-name' is name of the helm buffer (relvant for `helm-resume').
+`:buffer` is the buffer that you want to search.
 `:input' is the initial search term"
   (push plist orgnav-search-history)
 
-  (let (candidate-func point depth default-action helm-buffer-name input)
+  (let (candidate-func point depth default-action helm-buffer-name input buffer)
     (when (not (orgnav--set-eq
               (orgnav--plist-keys plist)
-              (list :candidate-func :point :depth :default-action :helm-buffer-name :input)))
+              (list :candidate-func :point :depth :default-action :helm-buffer-name :input :buffer)))
       (error "Wrong keys: %S" (orgnav--plist-keys plist)))
     (setq candidate-func (plist-get plist :candidate-func))
     (setq point (plist-get plist :point))
@@ -204,10 +209,11 @@ PLIST is a property list of *mandatory* values:
     (setq input (plist-get plist :input))
     (setq default-action (plist-get plist :default-action))
     (setq helm-buffer-name (plist-get plist :helm-buffer-name))
+    (setq buffer (plist-get plist :buffer))
 
     ;; Candidate functions appear to
     ;;   not be run in the current buffer, we need to keep track of the buffer
-    (setq orgnav--var-buffer (current-buffer))
+    (setq orgnav--var-buffer buffer)
     (setq orgnav--var-point point)
     (setq orgnav--var-depth depth)
     (setq helm-buffer-name (or helm-buffer-name "*orgnav-search*"))

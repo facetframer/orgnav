@@ -28,24 +28,39 @@
 
 (defvar orgnav-refile-depth 2 "The number of levels to show when refiling.")
 (defvar orgnav-refile--last-mark nil "Private state.")
+(defvar orgnav-refile--var-buffer nil "Private state.  Which buffer we are refiling to.")
+(defvar orgnav-refile--var-keep nil "Private state.  Should we keep the original heading.")
 
 ;;; Interactive entry points for refiling
 (defun orgnav-refile (source-point target-point &rest options)
-  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively.  Start with DEPTH levels displayed."
+  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively.
+OPTIONS are as `orgnav-search-subtree` but with the additional options `:target-buffer` and `:source-buffer`. "
   (interactive (list nil nil))
-  (setq options (orgnav--plist-update options :depth (or (plist-get options :depth) orgnav-refile-depth)))
-  (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action :helm-buffer-name "*orgnav refile*"))
+  (let (source-buffer)
+    (setq options (orgnav--plist-update options :depth (or (plist-get options :depth) orgnav-refile-depth)))
+    (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action :helm-buffer-name "*orgnav refile*"))
 
-  (save-excursion
-    (if (not (null source-point))
-        (goto-char source-point))
-    (apply 'orgnav-search-subtree target-point options)))
+    (setq orgnav-refile--var-buffer (or (plist-get options :target-buffer) (current-buffer)))
+    (setq orgnav-refile--var-keep nil)
+
+    (setq target-buffer (or (plist-get options :target-buffer) (current-buffer)))
+    (setq options (org-plist-delete options :target-buffer))
+    (setq options (plist-put options :buffer target-buffer))
+
+    (setq source-buffer (or (plist-get options :source-buffer) (current-buffer)))
+
+    (with-current-buffer source-buffer
+      (save-excursion
+        (if (not (null source-point))
+            (goto-char source-point))
+        (apply 'orgnav-search-subtree target-point options)))))
 
 (defun orgnav-refile-keep (source-point target-point &rest options)
   "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively while retaining original node."
   (interactive (list nil nil))
   (setq options (orgnav--plist-update options :depth (or (plist-get options :depth) orgnav-refile-depth)))
-  (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action-keep :helm-buffer-name "*orgnav refile*"))
+  (setq orgnav-refile--var-keep 't)
+  (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action :helm-buffer-name "*orgnav refile*"))
 
   (save-excursion
     (if (not (null source-point))
@@ -85,21 +100,17 @@
      (goto-char orgnav-refile--last-mark)
      (org-no-properties (org-get-heading))))
 
-
 (defun orgnav-refile--action (helm-entry)
   "Action used by `orgnav-refile` to refile to the selected entry HELM-ENTRY."
-  (orgnav--log "Action: refiling %S to %S" (point) helm-entry)
-  (setq orgnav-refile--last-mark (make-marker))
-  (set-marker orgnav-refile--last-mark helm-entry)
-  (org-refile nil nil (list nil buffer-file-name nil helm-entry)))
+  (let (refile-file-name)
+    (orgnav--log "Action: refiling %S to %S" (point) helm-entry)
+    (setq orgnav-refile--last-mark (make-marker))
+    (setq refile-file-name (or (buffer-file-name orgnav-refile--var-buffer) buffer-file-name))
+    (set-marker orgnav-refile--last-mark helm-entry)
 
-(defun orgnav-refile--action-keep (helm-entry)
-  "Action used by `orgnav-refile-keep` to refile to a selected HELM-ENTRY.
-The original entry is kept unlike `orgnav-refile--action'."
-  (orgnav--log "Action: refiling %S to %S" (point) helm-entry)
-  (setq orgnav-refile--last-mark (make-marker))
-  (set-marker orgnav-refile--last-mark helm-entry)
-  (org-refile 3 nil (list nil buffer-file-name nil helm-entry)))
+    (if orgnav-refile--var-keep
+        (org-refile 3 nil (list nil refile-file-name nil helm-entry))
+        (org-refile nil nil (list nil refile-file-name nil helm-entry)))))
 
 
 
