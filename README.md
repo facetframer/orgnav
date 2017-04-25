@@ -62,9 +62,18 @@ The core of this library is the navigation interface that can be used extensibly
 
 # helm-org
 `helm-org` has the feeling of a proof-of-concept library. `orgnav` is more complete, and
-intends to be more of a complete navigation tool than a searching library.
+intends to be a complete navigation tool rather than a searching library.
 However, for simple use cases, `helm-org` may be good enough and is likely more stable.
 You may be able to use `narrowing` to work around some of the limitations.
+
+# helm-org-rifle
+
+[helm-org-rifle](https://github.com/alphapapa/helm-org-rifle#changelog) is quite similar to this package.
+All searches are global and of arbitrary depth, though narrowing could address this point.
+Searches include the contents of entries. This is analogous to `helm-swoop`
+
+# org-search-goto
+
 
 ### Judicious use of `org-capture`, `org-refile`, and `org-find-olp`
 Though initially slightly cryptic if you are willing to do some
