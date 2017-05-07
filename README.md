@@ -60,6 +60,8 @@ The core of this library is the navigation interface that can be used extensibly
 
 ## Alternatives
 
+See [This stack overflow post](https://emacs.stackexchange.com/questions/32617/how-to-jump-directly-to-an-org-headline) for a discussion of various options.
+
 # helm-org
 `helm-org` has the feeling of a proof-of-concept library. `orgnav` is more complete, and
 intends to be a complete navigation tool rather than a searching library.
