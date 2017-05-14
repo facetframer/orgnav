@@ -56,6 +56,4 @@ If there is no such heading, return nil."
 
 (provide 'orgnav-hack)
 
-(provide 'orgnav-hack)
-
 ;;; orgnav-hack.el ends here
