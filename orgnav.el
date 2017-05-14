@@ -118,6 +118,7 @@ PLIST is a property list with the following values
     (setq input (plist-get plist :input))
     (setq node (or node (save-excursion (org-back-to-heading) (point))))
     (setq default-action (or default-action 'orgnav--goto-action))
+    (setq buffer (or (plist-get plist :buffer) (current-buffer)))
     (orgnav--search
      :candidate-func 'orgnav--get-ancestor-candidates
      :point node
