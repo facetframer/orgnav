@@ -23,7 +23,13 @@ are public functions that you might like to call.
 
 ## Installing
 
-Place this repository on your `load-path`. Add
+Download the source code.
+`master` is liable to have (quickly fixed) bugs.
+For versions that are less likely to have bugs see `https://github.com/facetframer/orgnav/releases/tag/release-0.1.0`.
+Place this repository on your `load-path`.
+
+
+Add
 
 ```
 (require `orgnav)
@@ -33,9 +39,8 @@ to your `init.el`.
 
 Run some functions with `M-x`.
 
-You may well want to set up some keybindings using
-`define-key` and `global-set-key`. No defaults are provided since users
-of this library likely have strong opinions about such things.
+You may well want to set up some keybindings using `define-key` and `global-set-key`.
+No defaults are provided since users of this library likely have strong opinions about such things.
 
 ## Debugging
 
