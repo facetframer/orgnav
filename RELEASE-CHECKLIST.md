@@ -1,0 +1,3 @@
+- Large changes made on 2017-05-15 do not releat until 2017-05-22
+- For large changes use in emacs for a week
+- Run test.sh - ensure it produces no errors
