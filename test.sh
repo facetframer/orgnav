@@ -44,3 +44,7 @@ cask eval "
          -e 'In toplevel form:' | grep -v '^$'
 
 
+# Having problems getting this to
+#  return 1 iff there are error lines, give up
+#  error in way that doesn't hide errors
+exit 1
