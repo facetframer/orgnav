@@ -29,7 +29,9 @@
 (require 's)
 (require 'dash)
 (require 'cl-seq)
+
 (require 'orgnav-tree)
+(require 'orgnav-version)
 
 (defvar orgnav-log nil "Whether orgnav should log.")
 
