@@ -21,6 +21,10 @@ This will display a list of keybindings. Using these keybindings is very much en
 Run `M-x orgnav<TAB>` for a list of functions: functions without `--`s in them
 are public functions that you might like to call.
 
+## Requirements
+
+This library makes use of [lexical bindings](https://www.gnu.org/software/emacs/manual/html_node/elisp/Lexical-Binding.html) in some functions, and so **requires emacs 24.1 or newer**.
+
 ## Installing
 
 Download the source code.
