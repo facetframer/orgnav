@@ -1,4 +1,4 @@
-;;; orgnav.el --- Org tree navigation using helm
+;;; orgnav.el --- Org tree navigation using helm -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016 Facet Framer
 
@@ -280,12 +280,7 @@ by default run DEFAULT-ACTION when return pressed."
     (save-excursion
       (mapcar
        'orgnav--make-candidate
-       (let ((current-level
-              (if (null orgnav--var-point) 0
-                (save-excursion
-                  (goto-char orgnav--var-point)
-                  (org-outline-level)))))
-         (orgnav-tree-get-descendants orgnav--var-point orgnav--var-depth))))))
+       (orgnav-tree-get-descendants orgnav--var-point orgnav--var-depth)))))
 
 (defun orgnav--get-ancestor-candidates ()
   "Find helm candidates for the ancestors of the location set by a search function."

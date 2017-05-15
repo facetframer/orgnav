@@ -1,4 +1,4 @@
-;;; orgnav-hack.el --- Work around in orgnav that we might remove some day
+;;; orgnav-hack.el --- Work around in orgnav that we might remove some day -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016 Facet Framer
 

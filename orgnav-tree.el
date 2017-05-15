@@ -1,4 +1,4 @@
-;;; orgnav-tree.el --- Orgnav functions to interact with trees
+;;; orgnav-tree.el --- Orgnav functions to interact with trees -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016 Facet Framer
 
@@ -115,7 +115,7 @@
   ;;; Adapted from org-map-region in org (GPL)
   "Call FUN for NODE, its siblings and their descendants up to DEPTH.  Does not deal with modification."
   (orgnav--log "(orgnav-tree--forest-map-raw %S %S %S)" fun node depth)
-  (lexical-let ((finished nil))
+  (let ((finished nil))
     (let ((org-ignore-region t))
       (when (>= depth 0)
         (save-excursion

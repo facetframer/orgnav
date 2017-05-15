@@ -1,4 +1,4 @@
-;;; orgnav-link.el --- Use orgnav to create links
+;;; orgnav-link.el --- Use orgnav to create links -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016 Facet Framer
 

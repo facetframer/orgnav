@@ -1,4 +1,4 @@
-;;; orgnav-version.el --- Store version information
+;;; orgnav-version.el --- Store version information -*- lexical-binding: t -*-
 ;;; Commentary:
 ;;
 

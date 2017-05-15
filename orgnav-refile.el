@@ -1,4 +1,4 @@
-;;; orgnav-refile.el --- Orgnav refile convenience functions
+;;; orgnav-refile.el --- Orgnav refile convenience functions -*- lexical-binding: t -*-
 
 ;; Copyright (C) 2016 Facet Framer
 
