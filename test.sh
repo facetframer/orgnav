@@ -13,7 +13,7 @@ here="$(dirname ${BASH_SOURCE[0]})"
 cd $here;
 
 cask install
-cask build
+cask build 2> >(grep -v -e "Warning: Unused lexical variable .org-capture-templates." -e "^Compiling" -e "^In toplevel form:$" >&2 )
 cask package
 
 cask eval "
@@ -36,4 +36,15 @@ cask eval "
 (checkdoc-file \"orgnav-capture.el\")
 (checkdoc-file \"orgnav-clock.el\")
 (checkdoc-file \"orgnav-refile.el\")
-)"
+)" 2>&1  |
+    grep -v -e "capture-function.*should appear in quotes" \
+         -e "Warning: Unused lexical variable .org-capture-templates." | grep -v -F \
+         -e "Warning (emacs):" \
+         -e "Some lines are over 80 columns wide" \
+         -e 'In toplevel form:' | grep -v '^$'
+
+
+# Having problems getting this to
+#  return 1 iff there are error lines, give up
+#  error in way that doesn't hide errors
+exit 1

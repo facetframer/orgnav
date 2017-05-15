@@ -1,4 +1,5 @@
-;;; orgnav-clock.el --- Orgnav capture convenience functions
+;;; orgnav-clock.el --- Orgnav capture convenience functions -*- lexical-binding: t -*-
+
 
 ;; Copyright (C) 2016 Facet Framer
 
@@ -31,10 +32,10 @@
 
 ;;; Interactive entry points for clocking
 (defun orgnav-clock-in (&rest properties)
-  "Clock in to a node. PROPERTIES is plist which can include the optional keys :buffer :node"
+  "Clock in to a node.  PROPERTIES is plist which can include the optional keys `:buffer`, `:node` and `depth`."
   (interactive (list orgnav-clock-buffer nil))
   (orgnav--assert-plist properties :depth :node :buffer)
-  (let (buffer node-point)
+  (let (buffer node-point depth)
     (setq buffer (or (plist-get properties :buffer) (current-buffer)))
     (setq node-point (plist-get properties :node))
     (setq depth (or (plist-get properties :depth) orgnav-clock-depth))
@@ -46,7 +47,8 @@
                                :helm-buffer-name "*orgnav-clock-in*")))))
 
 (defun orgnav-clock-in-point (&rest properties)
-  "Convenience function to clock into a child of the current node. PROPERTIES is a plist."
+  "Convenience function to clock into a child of the current node.
+PROPERTIES is a plist of properties as for `orgnav-clock-in`."
   (interactive)
   (apply 'orgnav-clock-in (plist-put properties :node (point))))
 
