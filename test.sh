@@ -36,4 +36,13 @@ cask eval "
 (checkdoc-file \"orgnav-capture.el\")
 (checkdoc-file \"orgnav-clock.el\")
 (checkdoc-file \"orgnav-refile.el\")
-)"
+)" 2>&1  |
+    grep -v "capture-function.*should appear in quotes" |
+    grep -v -F \
+         -e "Warning (emacs):" \
+         -e "Some lines are over 80 columns wide"
+
+if [ "$?" == 0 ]; then
+   exit 1;
+fi;
+

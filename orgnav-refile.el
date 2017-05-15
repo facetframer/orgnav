@@ -34,9 +34,9 @@
 ;;; Interactive entry points for refiling
 (defun orgnav-refile (source-point target-point &rest options)
   "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively.
-OPTIONS are as `orgnav-search-subtree` but with the additional options `:target-buffer` and `:source-buffer`. "
+OPTIONS are as `orgnav-search-subtree` but with the additional options `:target-buffer` and `:source-buffer`."
   (interactive (list nil nil))
-  (let (source-buffer)
+  (let (source-buffer target-buffer)
     (setq options (orgnav--plist-update options :depth (or (plist-get options :depth) orgnav-refile-depth)))
     (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action :helm-buffer-name "*orgnav refile*"))
 
@@ -56,7 +56,8 @@ OPTIONS are as `orgnav-search-subtree` but with the additional options `:target-
         (apply 'orgnav-search-subtree target-point options)))))
 
 (defun orgnav-refile-keep (source-point target-point &rest options)
-  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively while retaining original node."
+  "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively while retaining original node.
+Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
   (interactive (list nil nil))
   (setq options (orgnav--plist-update options :depth (or (plist-get options :depth) orgnav-refile-depth)))
   (setq orgnav-refile--var-keep 't)
@@ -77,8 +78,9 @@ OPTIONS are as `orgnav-search-subtree` but with the additional options `:target-
                           :default-action 'orgnav-refile--action
                           :helm-buffer-name "*orgnav refile*")))
 
-(defun orgnav-refile-nearby (&optional levels-up keep &rest settings)
-  "Refile nearby the current point.  Go up LEVELS-UP.  If KEEP keep the original entry."
+(defun orgnav-refile-nearby (&optional levels-up keep &rest options)
+  "Refile nearby the current point.  Go up LEVELS-UP.  If KEEP keep the original entry.
+Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
   (interactive)
   (let* (
          (up-levels (or levels-up 3))
@@ -88,7 +90,7 @@ OPTIONS are as `orgnav-search-subtree` but with the additional options `:target-
                  (org-back-to-heading)
                  (outline-up-heading (min up-levels (- (org-outline-level) 1))
                                      t) (point)))
-    (apply refile-function (point) node settings)))
+    (apply refile-function (point) node options)))
 
 (defun orgnav-refile-again ()
   "Refile to the location last selected by `orgnav-refile'."

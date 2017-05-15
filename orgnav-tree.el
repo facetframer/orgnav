@@ -103,6 +103,7 @@
           (orgnav-tree--mark-nodes node depth)))
 
 (defun orgnav-tree--mark-nodes (node depth)
+  "Collect markers for all the nodes in the subtree of NODE with depth less than DEPTH."
   (let (result)
     (orgnav-tree--forest-map-raw
      (lambda ()  (add-to-list 'result (point-marker)))
@@ -112,7 +113,7 @@
 
 (defun orgnav-tree--forest-map-raw (fun node depth)
   ;;; Adapted from org-map-region in org (GPL)
-  "Call FUN for NODE, its siblings and their descendants up to DEPTH.  Does not deal with modification"
+  "Call FUN for NODE, its siblings and their descendants up to DEPTH.  Does not deal with modification."
   (orgnav--log "(orgnav-tree--forest-map-raw %S %S %S)" fun node depth)
   (lexical-let ((finished nil))
     (let ((org-ignore-region t))

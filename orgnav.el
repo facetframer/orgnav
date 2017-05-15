@@ -148,6 +148,7 @@ PLIST is a property list with the following values
       :depth depth))))
 
 (defun orgnav--heading-lookup (buffer heading-specifier)
+  "Convenience function lookup in BUFFER for HEADING-SPECIFIER (olp, string, marker or integer)."
   (with-current-buffer buffer
     (cond
      ((listp heading-specifier) (org-find-olp heading-specifier t))
