@@ -36,18 +36,18 @@
   "Refile the node at SOURCE-POINT to a descendant of the node at TARGET-POINT interactively.
 OPTIONS are as `orgnav-search-subtree` but with the additional options `:target-buffer` and `:source-buffer`."
   (interactive (list nil nil))
-  (let (source-buffer target-buffer)
+  (-let (((&plist :source-buffer source-buffer :target-buffer target-buffer) options))
     (setq options (orgnav--plist-update options :depth (or (plist-get options :depth) orgnav-refile-depth)))
     (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action :helm-buffer-name "*orgnav refile*"))
 
-    (setq orgnav-refile--var-buffer (or (plist-get options :target-buffer) (current-buffer)))
+    (setq orgnav-refile--var-buffer (or target-buffer (current-buffer)))
     (setq orgnav-refile--var-keep nil)
 
-    (setq target-buffer (or (plist-get options :target-buffer) (current-buffer)))
+    (setq target-buffer (or target-buffer (current-buffer)))
     (setq options (org-plist-delete options :target-buffer))
     (setq options (plist-put options :buffer target-buffer))
 
-    (setq source-buffer (or (plist-get options :source-buffer) (current-buffer)))
+    (setq source-buffer (or source-buffer (current-buffer)))
 
     (with-current-buffer source-buffer
       (save-excursion
