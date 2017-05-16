@@ -21,7 +21,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; See README.md
+;; A library to navigate inside org files.
 
 ;;; Code:
 

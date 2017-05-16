@@ -5,7 +5,7 @@
 (files "orgnav-capture.el" "orgnav-clock.el" "orgnav.el" "orgnav-refile.el" "orgnav-tree.el")
 
 (depends-on "helm")
-
+(depends-on "emacs" "24")
 
 
 (development
