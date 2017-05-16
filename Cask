@@ -5,7 +5,7 @@
 (files "orgnav-capture.el" "orgnav-clock.el" "orgnav.el" "orgnav-refile.el" "orgnav-tree.el")
 
 (depends-on "helm" "2.7.0")
-(depends-on "helm" "24.1")
+(depends-on "helm" "24.4")
 (depends-on "s" "1.11.0")
 (depends-on "dash" "1.11.0")
 
