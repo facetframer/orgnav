@@ -4,7 +4,7 @@
 (package "orgnav" "0.1.0" "Quickly navigate and search your emacs org trees")
 (files "orgnav-capture.el" "orgnav-clock.el" "orgnav.el" "orgnav-refile.el" "orgnav-tree.el")
 
-(depends-on "helm")
+(depends-on "helm" "2.7.0")
 
 
 (development
