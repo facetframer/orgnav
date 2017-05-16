@@ -105,7 +105,7 @@ Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
 (defun orgnav-refile--action (helm-entry)
   "Action used by `orgnav-refile` to refile to the selected entry HELM-ENTRY."
   (let (refile-file-name)
-    (orgnav--log "Action: refiling %S to %S" (point) helm-entry)
+    (orgnav-log "Action: refiling %S to %S" (point) helm-entry)
     (setq orgnav-refile--last-mark (make-marker))
     (setq refile-file-name (or (buffer-file-name orgnav-refile--var-buffer) buffer-file-name))
     (set-marker orgnav-refile--last-mark helm-entry)

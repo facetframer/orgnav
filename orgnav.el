@@ -32,8 +32,8 @@
 
 (require 'orgnav-tree)
 (require 'orgnav-version)
+(require 'orgnav-log)
 
-(defvar orgnav-log nil "Whether orgnav should log.")
 
 (defvar orgnav-search-history nil "List of orgnav searches.")
 
@@ -142,10 +142,6 @@ PLIST is a property list with the following values
   (interactive (list 1))
   (orgnav-search-subtree (orgnav-tree-get-ancestor (point) levels)))
 
-(defun orgnav-log ()
-  "Toggle orgnav logging."
-  (interactive)
-  (setq orgnav-log (not orgnav-log)))
 
 ;;; Functions that you might want to script
 (defun orgnav-jump-interactive (base-filename base-heading-spec &optional depth)
@@ -235,7 +231,7 @@ PLIST is a property list of *mandatory* values:
     (setq helm-buffer-name (or helm-buffer-name "*orgnav-search*"))
     (setq orgnav--var-default-action default-action)
 
-    (orgnav--log "orgnav--search candidate-func=%S action=%S header=%S depth=%S input=%S"
+    (orgnav-log "orgnav--search candidate-func=%S action=%S header=%S depth=%S input=%S"
               candidate-func
               orgnav--var-default-action
               (orgnav-tree-get-heading orgnav--var-buffer orgnav--var-point)
@@ -327,13 +323,13 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 (defun orgnav--goto-action (helm-entry)
   "Go to the node represented by HELM-ENTRY."
   (interactive)
-  (orgnav--log "Action: go to %S" helm-entry)
+  (orgnav-log "Action: go to %S" helm-entry)
   (goto-char helm-entry)
   (org-reveal))
 
 (defun orgnav--explore-action (helm-entry)
   "Start search again from HELM-ENTRY."
-  (orgnav--log "Action: explore %S" helm-entry)
+  (orgnav-log "Action: explore %S" helm-entry)
   (orgnav-search-subtree helm-entry
                       :depth 1
                       :default-action orgnav--var-default-action
@@ -341,7 +337,7 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 
 (defun orgnav--explore-ancestors-action (helm-entry)
   "Start search again looking ancestors of HELM-ENTRY."
-  (orgnav--log "Action: explore ancestors of %S" helm-entry)
+  (orgnav-log "Action: explore ancestors of %S" helm-entry)
   (orgnav-search-ancestors
    helm-entry
    :default-action orgnav--var-default-action
@@ -349,14 +345,14 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 
 (defun orgnav--back-action (ignored)
   "Go the the previous orgnav search view.  IGNORED is ignored."
-  (orgnav--log "Action: Go back")
-  (orgnav--log "orgnav--back-action: search history %S" orgnav-search-history)
+  (orgnav-log "Action: Go back")
+  (orgnav-log "orgnav--back-action: search history %S" orgnav-search-history)
   (pop orgnav-search-history)
   (apply 'orgnav--search (pop orgnav-search-history)))
 
 (defun orgnav--explore-parent-action (ignored)
   "Start search again from one level higher.  Ignore IGNORED."
-  (orgnav--log "Action: explore parent of search at %S"
+  (orgnav-log "Action: explore parent of search at %S"
             orgnav--var-point)
   (orgnav--tweak-search
    :point (orgnav-tree-get-parent orgnav--var-point)
@@ -364,28 +360,28 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 
 (defun orgnav--increase-depth-action (ignored)
   "Search again showing nodes at a greater depth.  IGNORED is ignored."
-  (orgnav--log "Action: Increasing depth of search")
+  (orgnav-log "Action: Increasing depth of search")
   (orgnav--tweak-search
    :depth (max (+ orgnav--var-depth 1) 1)
    :input (orgnav--get-input)))
 
 (defun orgnav--decrease-depth-action (ignored)
   "Search again hiding more descendents.  IGNORED is ignored."
-  (orgnav--log "Action: decrease depth of search")
+  (orgnav-log "Action: decrease depth of search")
   (orgnav--tweak-search
    :depth (max (- orgnav--var-depth 1) 1)
    :input (orgnav--get-input)))
 
 (defun orgnav--show-path-action (helm-entry)
   "Show the path to this HELM-ENTRY."
-  (orgnav--log "Action: showing path to %S" helm-entry)
+  (orgnav-log "Action: showing path to %S" helm-entry)
   (orgnav--popup
    (orgnav--format-path helm-entry))
   (orgnav--tweak-search :input (orgnav--get-input)))
 
 (defun orgnav--new-action (helm-entry)
   "Create child under the select HELM-ENTRY.  IGNORED is ignored."
-  (orgnav--log "Action: Creating a new node under %S" helm-entry)
+  (orgnav-log "Action: Creating a new node under %S" helm-entry)
   (let* (
          (point-function (lambda ()  (set-buffer orgnav--var-buffer) (goto-char helm-entry)))
          (org-capture-templates (list (list "." "Default action" 'entry (list 'function point-function) "* %(read-string \"Name\")"))))
@@ -394,12 +390,12 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
 (defun orgnav--return-result-action (helm-entry)
   "A convenience action for synchronouse functions.
 Store the location of HELM-ENTRY so that the synchronous functions can return them."
-  (orgnav--log "Action: Saving %S to return" helm-entry)
+  (orgnav-log "Action: Saving %S to return" helm-entry)
   (setq orgnav--var-result helm-entry))
 
 (defun orgnav--rename-action (helm-entry)
   "Action to rename HELM-ENTRY."
-  (orgnav--log "Action: renaming %S" helm-entry)
+  (orgnav-log "Action: renaming %S" helm-entry)
   (let (heading)
     (setq heading
           (read-string "New name" (save-excursion
@@ -414,16 +410,13 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
 
 (defun orgnav--clock-action (helm-entry)
   "Clock into the selected HELM-ENTRY."
-  (orgnav--log "Action: Clocking into %S" helm-entry)
+  (orgnav-log "Action: Clocking into %S" helm-entry)
   (save-excursion
     (goto-char helm-entry)
     (org-clock-in)))
 
 ;;; Utility functions
-(defun orgnav--log (format-string &rest args)
-  "Print logging depending of ORGNAV-LOG variable.  FORMAT-STRING  and ARGS have the same meanings as message."
-  (when orgnav-log
-    (message (apply 'format format-string args))))
+
 
 (defun orgnav--assert-plist (plist &rest members)
   "Ensure that the property list PLIST has only keys in MEMBERS."

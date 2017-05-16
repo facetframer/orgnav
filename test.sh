@@ -26,22 +26,15 @@ cask eval "
 (require 'orgnav-refile)
 (require 'orgnav-tree)
 (setq byte-compile-error-on-warn 't)
-(byte-compile-file \"orgnav.el\")
-(byte-compile-file \"orgnav-tree.el\")
-(byte-compile-file \"orgnav-capture.el\")
-(byte-compile-file \"orgnav-clock.el\")
-(byte-compile-file \"orgnav-refile.el\")
-(checkdoc-file \"orgnav.el\")
-(checkdoc-file \"orgnav-tree.el\")
-(checkdoc-file \"orgnav-capture.el\")
-(checkdoc-file \"orgnav-clock.el\")
-(checkdoc-file \"orgnav-refile.el\")
-)" 2>&1  |
-    grep -v -e "capture-function.*should appear in quotes" \
-         -e "Warning: Unused lexical variable .org-capture-templates." | grep -v -F \
-         -e "Warning (emacs):" \
-         -e "Some lines are over 80 columns wide" \
-         -e 'In toplevel form:' | grep -v '^$'
+(setq files (directory-files \".\" nil \"\\\\.el$\"))
+(setq files (remove \"orgnav-pkg.el\" files))
+(cl-loop for file in  files do (byte-compile-file file ))
+(cl-loop for file in  files do (checkdoc-file file))
+)" 2>&1  | grep -v -e "capture-function.*should appear in quotes" \
+    -e "Warning: Unused lexical variable .org-capture-templates." | grep -v -F \
+    -e "Warning (emacs):" \
+    -e "Some lines are over 80 columns wide" \
+    -e 'In toplevel form:' | grep -v '^$'
 
 
 # Having problems getting this to

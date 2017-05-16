@@ -37,7 +37,7 @@
 
 (defun orgnav-link--get-set-custom-id (point)
   "Get (or set and get) the custom id property for the node at POINT."
-  (orgnav--log "Getting custom id for %S" point)
+  (orgnav-log "Getting custom id for %S" point)
   (let (custom-id)
     (save-excursion
       (goto-char point)
@@ -50,7 +50,7 @@
 (defun orgnav-link--new-custom-id (string)
   "Create unique custom id containing STRING."
   (save-excursion
-    (orgnav--log "Build customing link at %S" (point))
+    (orgnav-log "Build customing link at %S" (point))
     (substring-no-properties
      (s-concat
       (s-replace " " "-" string)

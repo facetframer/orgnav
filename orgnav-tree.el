@@ -26,6 +26,7 @@
 
 (require 'org)
 (require 'orgnav-hack)
+(require 'orgnav-log)
 
 (defun orgnav-tree-get-parent (point)
   "Get the parent of the node at POINT."
@@ -114,7 +115,7 @@
 (defun orgnav-tree--forest-map-raw (fun node depth)
   ;;; Adapted from org-map-region in org (GPL)
   "Call FUN for NODE, its siblings and their descendants up to DEPTH.  Does not deal with modification."
-  (orgnav--log "(orgnav-tree--forest-map-raw %S %S %S)" fun node depth)
+  (orgnav-log "(orgnav-tree--forest-map-raw %S %S %S)" fun node depth)
   (let ((finished nil))
     (let ((org-ignore-region t))
       (when (>= depth 0)
