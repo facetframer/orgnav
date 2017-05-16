@@ -33,12 +33,11 @@
 ;;; Interactive entry points for clocking
 (defun orgnav-clock-in (&rest properties)
   "Clock in to a node.  PROPERTIES is plist which can include the optional keys `:buffer`, `:node` and `depth`."
-  (interactive (list orgnav-clock-buffer nil))
+  (interactive (list :buffer orgnav-clock-buffer))
   (orgnav--assert-plist properties :depth :node :buffer)
-  (let (buffer node-point depth)
-    (setq buffer (or (plist-get properties :buffer) (current-buffer)))
-    (setq node-point (plist-get properties :node))
-    (setq depth (or (plist-get properties :depth) orgnav-clock-depth))
+  (-let (((&plist :buffer buffer :node node-point :depth depth) properties ))
+    (setq buffer (or buffer (current-buffer) ))
+    (setq depth (or depth orgnav-clock-depth ))
     (with-current-buffer buffer
       (save-excursion
         (orgnav-search-subtree node-point
