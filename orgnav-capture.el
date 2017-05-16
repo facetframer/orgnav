@@ -27,6 +27,7 @@
 (defvar orgnav-capture-depth 2 "The number of levels to show when refiling.")
 
 (require 'orgnav)
+(require 'org-capture)
 
 
 (defun orgnav-capture-function-global ()
