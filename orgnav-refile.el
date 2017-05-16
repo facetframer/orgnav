@@ -79,7 +79,8 @@ Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
                           :helm-buffer-name "*orgnav refile*")))
 
 (defun orgnav-refile-nearby (&optional levels-up keep &rest options)
-  "Refile nearby the current point.  Go up LEVELS-UP.  If KEEP keep the original entry.
+  "Refile nearby the current point.  Go up LEVELS-UP.
+If KEEP keep the original entry.
 Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
   (interactive)
   (let* (
