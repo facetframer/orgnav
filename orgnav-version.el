@@ -4,7 +4,7 @@
 
 ;;; Code:
 
-(defconst orgnav-version "0.2.2")
+(defconst orgnav-version "0.2.3")
 
 (provide 'orgnav-version)
 ;;; orgnav-version ends here
