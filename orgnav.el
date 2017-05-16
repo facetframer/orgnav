@@ -37,6 +37,8 @@
 
 (defvar orgnav-search-history nil "List of orgnav searches.")
 
+
+
 (defvar orgnav-mapping
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
@@ -139,6 +141,11 @@ PLIST is a property list with the following values
   "Search near the current node, LEVELS levels up."
   (interactive (list 1))
   (orgnav-search-subtree (orgnav-tree-get-ancestor (point) levels)))
+
+(defun orgnav-log ()
+  "Toggle orgnav logging."
+  (interactive)
+  (setq orgnav-log (not orgnav-log)))
 
 ;;; Functions that you might want to script
 (defun orgnav-jump-interactive (base-filename base-heading-spec &optional depth)
