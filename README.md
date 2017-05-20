@@ -69,7 +69,7 @@ The core of this library is the navigation interface that can be used extensibly
 
 ## Alternatives and prior work
 
-See [This stack overflow post](https://emacs.stackexchange.com/questions/32617/how-to-jump-directly-to-an-org-headline) for a discussion of various options. This tool was inspired by the limitiations of `helm-org`. In fact, the projects initial name of *better helm org*.
+See [this stack overflow post](https://emacs.stackexchange.com/questions/32617/how-to-jump-directly-to-an-org-headline) for a discussion of various options. This tool was inspired by the limitiations of `helm-org`. In fact, the projects initial name of *better helm org*.
 
 Many tools provide similar functionality, but as a rule this is a useful one-off corner case rather than a general tool to move around org files. This speaks to the value of a general navigation tool.
 
