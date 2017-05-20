@@ -67,24 +67,55 @@ The core of this library is the navigation interface that can be used extensibly
 * Refiling (`orgnav-refile`, `orgnav-refile-ancestors` and friends)
 * Use with `org-capture` to select your capture target (`orgnav-capture-function-relative` and `orgnav-capture-function-global`)
 
-## Alternatives
+## Alternatives and prior work
 
-See [This stack overflow post](https://emacs.stackexchange.com/questions/32617/how-to-jump-directly-to-an-org-headline) for a discussion of various options.
+See [This stack overflow post](https://emacs.stackexchange.com/questions/32617/how-to-jump-directly-to-an-org-headline) for a discussion of various options. This tool was inspired by the limitiations of `helm-org`. In fact, the projects initial name of *better helm org*.
+
+Many tools provide similar functionality, but as a rule this is a useful one-off corner case rather than a general tool to move around org files. This speaks to the value of a general navigation tool.
+
+Looking at the alternatives reviewed:
+
+- None of the alternatives reviewed provides the ability to search under a particular node rather than globally (though this can be dealt with by narrow).
+- None of the alternatives reviewed allow one to chain together searches (for example searching under a category that you have found)
+- None of the alternatives reviewed provide easy ways to use the interface programmatically from `org-refile` or `org-capture`
+- None of the alternatives reviewed allow one to change the depth that you are searching at (although `org-goto` searches with a depth of 1 rather than unbounded depth like other tools)
 
 # helm-org
 `helm-org` has the feeling of a proof-of-concept library. `orgnav` is more complete, and
 intends to be a complete navigation tool rather than a searching library.
 However, for simple use cases, `helm-org` may be good enough and is likely more stable.
-You may be able to use `narrowing` to work around some of the limitations.
+
+`helm-org` only allows searching from the root node whereas `orgnav` allows searching from a particularly node. This could be achieved with narrowing.
+
+`orgnav` allows the chaining together of searches. This is particularly useful when one wants to search within a headline that you find.
+
+`orgnav` allow one to vary the depth of search. This can be very important when one has a large tree to search.
 
 # helm-org-rifle
 
 [helm-org-rifle](https://github.com/alphapapa/helm-org-rifle#changelog) is quite similar to this package.
 All searches are global and of arbitrary depth, though narrowing could address this point.
-Searches include the contents of entries. This is analogous to `helm-swoop`
+Searches include the contents of entries. This is analogous to `helm-swoop`.
+
+When there is a large amount of text contained within entries (as is often the case) is is very useful to search just headlines.
+Searching just the headlines means fewer characters are required to find the entry that you are looking for.
+
+At times one explicitly wants to search content however.
 
 # org-search-goto
 
+*org-search-goto* allows one to search within headlines.
+
+*org-search-goto* does not allow one to iteratively searching: a single search term is provided and searched for.
+*org-search-goto` does not allow chaining of searches.
+
+# org-goto
+`org-goto` is `org`'s built-in navigation tool.
+It is more of an iterative search tool (like `isearch`) than a summary tool, as such, finding a particularly entry can require one to search through all the matches in one's document one by one.
+
+`org-goto` can be made to use a pager using `outline-path-complete`. This does not work with `helm`. Further it can only show one level of depth and always performs a global search.
+
+Again nothing like `orgnav`s ability to chain together a number of searches starting at different points is provided.
 
 ### Judicious use of `org-capture`, `org-refile`, and `org-find-olp`
 Though initially slightly cryptic if you are willing to do some
@@ -106,6 +137,18 @@ to create multiple views of your buffer.
 `org-sparse-tree` also has the benefit of allowing in-place editing.
 `helm` does not support this, but similar types of actions can be achieved in `orgnav` through
 `org-capture`.
+
+### worf-goto
+*worf* is a convenient navigation tool for org files. It works by providing keybindings for motions that apply when one's cursor is over the leading "*"s of a heading.
+
+*worf* provides a search function `worf-goto`. This allows one to interactively update search terms like `orgnav`.
+
+Searches are global. No means of varying the depth of search is provided. There is no way to chain together searches as for *orgnav*.
+
+### imenu
+*imenu* is a general framework for deriving a named list of locations within a file. In source code files, provides a list of function or class definitions. In *org* files it provides a list of headings. As such a general tool, one would not necessarily expect its search model to fit org-mode well.
+
+*imenu* has no concept of depth when searching. Searches are global. There is no way of varying the depth of searches. There is no way of chaining together searches at different levels.
 
 ## Caveats
 
