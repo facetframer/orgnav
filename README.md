@@ -80,7 +80,7 @@ Looking at the alternatives reviewed:
 - None of the alternatives reviewed provide easy ways to use the interface programmatically from `org-refile` or `org-capture`
 - None of the alternatives reviewed allow one to change the depth that you are searching at (although `org-goto` searches with a depth of 1 rather than unbounded depth like other tools)
 
-# helm-org
+### helm-org
 `helm-org` has the feeling of a proof-of-concept library. `orgnav` is more complete, and
 intends to be a complete navigation tool rather than a searching library.
 However, for simple use cases, `helm-org` may be good enough and is likely more stable.
@@ -91,7 +91,7 @@ However, for simple use cases, `helm-org` may be good enough and is likely more 
 
 `orgnav` allow one to vary the depth of search. This can be very important when one has a large tree to search.
 
-# helm-org-rifle
+### helm-org-rifle
 
 [helm-org-rifle](https://github.com/alphapapa/helm-org-rifle#changelog) is quite similar to this package.
 All searches are global and of arbitrary depth, though narrowing could address this point.
@@ -102,14 +102,14 @@ Searching just the headlines means fewer characters are required to find the ent
 
 At times one explicitly wants to search content however.
 
-# org-search-goto
+### org-search-goto
 
 *org-search-goto* allows one to search within headlines.
 
 *org-search-goto* does not allow one to iteratively searching: a single search term is provided and searched for.
 *org-search-goto` does not allow chaining of searches.
 
-# org-goto
+### org-goto
 `org-goto` is `org`'s built-in navigation tool.
 It is more of an iterative search tool (like `isearch`) than a summary tool, as such, finding a particularly entry can require one to search through all the matches in one's document one by one.
 
