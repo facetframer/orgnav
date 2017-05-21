@@ -1,4 +1,4 @@
-;;; orgnav-clock.el --- Orgnav capture convenience functions -*- lexical-binding: t -*-
+;;; orgnav-clock.el --- Orgnav convenience functions for clocking into and our of items -*- lexical-binding: t -*-
 
 
 ;; Copyright (C) 2016 Facet Framer
