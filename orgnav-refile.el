@@ -85,7 +85,8 @@ Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
   (interactive)
   (let* (
          (up-levels (or levels-up 3))
-         (refile-function (if keep 'orgnav-refile-keep 'orgnav-refile))
+         (refile-function
+          (if keep 'orgnav-refile-keep 'orgnav-refile))
          (node))
     (setq node (save-excursion
                  (org-back-to-heading)
@@ -113,7 +114,7 @@ Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
 
     (if orgnav-refile--var-keep
         (org-refile 3 nil (list nil refile-file-name nil helm-entry))
-        (org-refile nil nil (list nil refile-file-name nil helm-entry)))))
+      (org-refile nil nil (list nil refile-file-name nil helm-entry)))))
 
 
 
