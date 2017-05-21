@@ -97,7 +97,7 @@ Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
 (defun orgnav-refile-again ()
   "Refile to the location last selected by `orgnav-refile'."
   (interactive)
-  (if (null orgnav-refile--last-mark)
+  (unless orgnav-refile--last-mark
       (error 'no-last-run))
   (orgnav-refile--action (marker-position orgnav-refile--last-mark))
   (save-excursion

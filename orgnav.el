@@ -294,7 +294,7 @@ by default run DEFAULT-ACTION when return pressed."
   "Find helm candidates for the ancestors of the location set by a search function."
   (with-current-buffer orgnav--var-buffer
     (save-excursion
-      (if orgnav--var-point
+      (when orgnav--var-point
           (goto-char orgnav--var-point))
       (mapcar 'orgnav--make-candidate
               (orgnav-tree-ancestors)))))
@@ -425,9 +425,9 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
 
 (defun orgnav--plist-keys (plist)
   "Return a list of the keys in PLIST."
-  (if (null plist)
-      nil
-    (cons (car plist) (orgnav--plist-keys (cddr plist)))))
+  (if plist
+      (cons (car plist) (orgnav--plist-keys (cddr plist)))
+    nil))
 
 (defun orgnav--set-eq (set1 set2)
   "Test if lists SET1 and SET2 have the same members."
