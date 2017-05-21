@@ -51,7 +51,7 @@ OPTIONS are as `orgnav-search-subtree` but with the additional options `:target-
 
     (with-current-buffer source-buffer
       (save-excursion
-        (if (not (null source-point))
+        (when source-point
             (goto-char source-point))
         (apply 'orgnav-search-subtree target-point options)))))
 
@@ -64,7 +64,7 @@ Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
   (setq options (orgnav--plist-update options :default-action 'orgnav-refile--action :helm-buffer-name "*orgnav refile*"))
 
   (save-excursion
-    (if (not (null source-point))
+    (when source-point
         (goto-char source-point))
     (apply 'orgnav-search-subtree target-point options)))
 
@@ -72,7 +72,7 @@ Use OPTIONS when searching for insertion point (see `orgnav-search-subtree)."
   "Refile the node at SOURCE-POINT to an ancestor of the node at TARGET-POINT interactively."
   (interactive (list nil nil))
   (save-excursion
-    (if (not (null source-point))
+    (when source-point
         (goto-char source-point))
     (orgnav-search-ancestors target-point
                           :default-action 'orgnav-refile--action

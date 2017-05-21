@@ -148,7 +148,7 @@ PLIST is a property list with the following values
   "Jump to an ancestor of the heading of BASE-FILENAME specified by BASE-HEADING-SPEC.  Display DEPTH levels."
   (let (node)
     (setq depth (or depth 2))
-    (if (not (null base-filename)) (find-file base-filename))
+    (when base-filename (find-file base-filename))
     (setq node (orgnav--heading-lookup (current-buffer) base-heading-spec))
     (orgnav--goto-action
      (orgnav-search-subtree-sync

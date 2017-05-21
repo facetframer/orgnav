@@ -56,7 +56,7 @@
   (interactive)
   (let ((result))
     (save-excursion
-      (if (not (null tree)) (goto-char tree))
+      (when tree (goto-char tree))
       (if
           (null tree)
           (orgnav-tree-buffer-map (lambda () (add-to-list 'result (point) 't)) depth)
