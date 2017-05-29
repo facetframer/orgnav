@@ -55,13 +55,14 @@
   "Get the positions of all the headings under the tree at TREE up to DEPTH."
   (interactive)
   (let ((result))
-    (save-excursion
-      (if (not (null tree)) (goto-char tree))
-      (if
-          (null tree)
-          (orgnav-tree-buffer-map (lambda () (add-to-list 'result (point) 't)) depth)
-        (orgnav-tree-tree-map (lambda () (add-to-list 'result (point) 't)) tree depth)))
-    result))
+
+  (save-excursion
+    (when tree (goto-char tree))
+    (if tree
+        (orgnav-tree-tree-map (lambda () (add-to-list 'result (point) 't)) tree depth)
+      (orgnav-tree-buffer-map (lambda () (add-to-list 'result (point) 't)) depth)
+      ))
+  result))
 
 (defun orgnav-tree-rename (point name)
   "Rename the node at POINT to NAME."

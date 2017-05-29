@@ -33,14 +33,14 @@
   (outline-back-to-heading 't)
   (while (> arg 0)
     (let ((point-to-move-to (save-excursion
-			      (orgnav-hack--outline-get-next-sibling))))
+                              (orgnav-hack--outline-get-next-sibling))))
       (if point-to-move-to
-	  (progn
-	    (goto-char point-to-move-to)
-	    (setq arg (1- arg)))
-	(progn
-	  (setq arg 0)
-	  (signal 'orgnav-last-error "No following same-level heading"))))))
+          (progn
+            (goto-char point-to-move-to)
+            (setq arg (1- arg)))
+        (progn
+          (setq arg 0)
+          (signal 'orgnav-last-error "No following same-level heading"))))))
 
 (defun orgnav-hack--outline-get-next-sibling ()
   ;;; Stolen from outline to work around bug
@@ -51,7 +51,7 @@ If there is no such heading, return nil."
     (while (and (not (eobp)) (> (funcall outline-level) level))
       (outline-next-heading))
     (if (or (eobp) (< (funcall outline-level) level))
-	nil
+        nil
       (point))))
 
 (provide 'orgnav-hack)

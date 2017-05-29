@@ -3,9 +3,10 @@
 ;; Copyright (C) 2016 Facet Framer
 
 ;; Author: Facet Framer (facet@facetframer.com)
-;; URL: github.com/facetframer/orgnav
-
-;; Keywords: org tree navigation
+;; URL: http://github.com/facetframer/orgnav
+;; Version: 0.2.3
+;; Keywords: convenience, outlines
+;; Package-Requires: ((helm "2.7.0") (s "1.11.0") (dash "1.11.0") (emacs "24"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -148,7 +149,7 @@ PLIST is a property list with the following values
   "Jump to an ancestor of the heading of BASE-FILENAME specified by BASE-HEADING-SPEC.  Display DEPTH levels."
   (let (node)
     (setq depth (or depth 2))
-    (if (not (null base-filename)) (find-file base-filename))
+    (when base-filename (find-file base-filename))
     (setq node (orgnav--heading-lookup (current-buffer) base-heading-spec))
     (orgnav--goto-action
      (orgnav-search-subtree-sync
@@ -294,7 +295,7 @@ by default run DEFAULT-ACTION when return pressed."
   "Find helm candidates for the ancestors of the location set by a search function."
   (with-current-buffer orgnav--var-buffer
     (save-excursion
-      (if orgnav--var-point
+      (when orgnav--var-point
           (goto-char orgnav--var-point))
       (mapcar 'orgnav--make-candidate
               (orgnav-tree-ancestors)))))
@@ -425,9 +426,9 @@ Store the location of HELM-ENTRY so that the synchronous functions can return th
 
 (defun orgnav--plist-keys (plist)
   "Return a list of the keys in PLIST."
-  (if (null plist)
-      nil
-    (cons (car plist) (orgnav--plist-keys (cddr plist)))))
+  (if plist
+      (cons (car plist) (orgnav--plist-keys (cddr plist)))
+    nil))
 
 (defun orgnav--set-eq (set1 set2)
   "Test if lists SET1 and SET2 have the same members."
