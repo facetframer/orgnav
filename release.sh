@@ -10,7 +10,7 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi;
 
-cat orgnav.el | grep ';; Version'  | cut -d : -f 2 2>/dev/null | {
+cat orgnav.el | grep ';; Version'  | sed -E 's/^ +//' | cut -d : -f 2 2>/dev/null | {
     version="$(cat)"; git tag release-$version;
     SSH_AUTH_SOCK= git push public release-$version;
 }
