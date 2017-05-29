@@ -3,9 +3,10 @@
 ;; Copyright (C) 2016 Facet Framer
 
 ;; Author: Facet Framer (facet@facetframer.com)
-;; URL: github.com/facetframer/orgnav
-
-;; Keywords: org tree navigation
+;; URL: http://github.com/facetframer/orgnav
+;; Version: 0.2.3
+;; Keywords: convenience, outlines
+;; Package-Requires: ((helm "2.7.0") (s "1.11.0") (dash "1.11.0") (emacs "24"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
