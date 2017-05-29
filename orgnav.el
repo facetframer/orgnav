@@ -32,7 +32,6 @@
 (require 'cl-seq)
 
 (require 'orgnav-tree)
-(require 'orgnav-version)
 (require 'orgnav-log)
 
 
