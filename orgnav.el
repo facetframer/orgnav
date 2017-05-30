@@ -385,6 +385,13 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
   (let* (
          (point-function (lambda ()  (set-buffer orgnav--var-buffer) (goto-char helm-entry)))
          (org-capture-templates (list (list "." "Default action" 'entry (list 'function point-function) "* %(read-string \"Name\")"))))
+    (let* ((current-input (orgnav--get-input))
+           callback)
+      (setq callback (lambda ()
+                       (orgnav--tweak-search :input current-input)
+                       (remove-hook 'org-capture-after-finalize-hook callback)))
+      (add-hook 'org-capture-after-finalize-hook callback))
+
     (org-capture nil ".")))
 
 (defun orgnav--return-result-action (helm-entry)
