@@ -51,6 +51,12 @@ PROPERTIES is a plist of properties as for `orgnav-clock-in`."
   (interactive)
   (apply 'orgnav-clock-in (plist-put properties :node (point))))
 
+(defun orgnav-clock-in-nearby ()
+  "Clock into a node near the currently clocking item."
+  (interactive)
+  (save-excursion
+    (org-clock-goto)
+    (orgnav-clock-in-point)))
 
 (defun orgnav-search-clocking ()
   "Start a search relative to the currently clocking activity."
