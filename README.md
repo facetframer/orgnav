@@ -27,11 +27,16 @@ This library makes use of [lexical bindings](https://www.gnu.org/software/emacs/
 
 ## Installing
 
+Orgnav is available on MELPA.
+Only stable versions are released to MELPA, though the standards for stable are not that high.
+`dev` is the bleeding edge branch which should be installed manually.
+
+### Manual installation
+
 Download the source code.
 `master` is liable to have (quickly fixed) bugs.
-For versions that are less likely to have bugs see `https://github.com/facetframer/orgnav/releases/tag/release-0.1.0`.
+For versions that are less likely to have bugs see `https://github.com/facetframer/orgnav/releases/`.
 Place this repository on your `load-path`.
-
 
 Add
 
