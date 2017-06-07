@@ -76,13 +76,13 @@ The core of this library is the navigation interface that can be used extensibly
 
 See [this stack overflow post](https://emacs.stackexchange.com/questions/32617/how-to-jump-directly-to-an-org-headline) for a discussion of various options. This tool was inspired by the limitiations of `helm-org`. In fact, the projects initial name of *better helm org*.
 
-Many tools provide similar functionality, but as a rule this is a useful one-off corner case rather than a general tool to move around org files. This speaks to the value of a general navigation tool.
+Many tools provide similar functionality, but as a rule this is a useful one-off corner case as part of another tool rather than a general tool to move around within org files. The fact that these features have evolved in parallel within several tools speaks to the value of a general navigation tool.
 
-Looking at the alternatives reviewed:
+Some comments on the alternatives reviewed below:
 
-- None of the alternatives reviewed provides the ability to search under a particular node rather than globally (though this can be dealt with by narrow).
-- None of the alternatives reviewed allow one to chain together searches (for example searching under a category that you have found)
-- None of the alternatives reviewed provide easy ways to use the interface programmatically from `org-refile` or `org-capture`
+- None of the alternatives reviewed provides the ability to search under a particular node rather than globally (though this is orgnav achievable through narrowing). I find the "relative refile" that *orgnav* provides particularly useful.
+- None of the alternatives reviewed allow one to chain together searches (for example searching under a node that you have found)
+- None of the alternatives reviewed provide easy ways to use the interface programmatically from `org-refile` or `org-capture`. The exception is outline-path-complete with `org-goto`. I have found no way to support fuzzy search within this tool.
 - None of the alternatives reviewed allow one to change the depth that you are searching at (although `org-goto` searches with a depth of 1 rather than unbounded depth like other tools)
 
 ### helm-org
