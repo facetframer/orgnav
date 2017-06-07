@@ -22,9 +22,12 @@ fi;
             ;;
         feature|deprecation)
             feature=$(($feature +1))
+            bug=0
             ;;
         incompatible)
             incompatible=$(($incompatible +1))
+            bug=0
+            feature=0
             ;;
         *)
             echo "usage: $0 bug|feature|deprecation|incompatible" 2>&1
