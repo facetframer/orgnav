@@ -163,11 +163,23 @@ Searches are global. No means of varying the depth of search is provided. There 
 
 Contributions are welcome.
 
+Development happens on the `dev` branch. I have a low threshold for deploying to this branch.
+The `master` branch is used for [MELPA](https://melpa.org/) deployment (this branch should probably be called `melpa`).
+Every version on `MELPA` should correspond to a release.
+
 Testing helm is hard. This may prove to be an issue for accepting contributions, but I can deal with
 this if anyone actually contributes anything. It's probably possible to script helm for testing.
 
 You can do some basic linting, and ensure that installation works using `test.sh`.
 
+### My checklist for deploying to MELPA
+
+* Run `test.sh` (this does linting)
+* Bump version and run `release.sh`.
+* Make `melpa` can build with this version.
+* Do some basic manual testing (let this branch sit on my machine for a couple of days)
+
+I intend to automate some of these steps as time continues.
 
 ### Releasing
 
