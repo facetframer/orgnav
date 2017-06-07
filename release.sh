@@ -12,5 +12,6 @@ fi;
 
 cat orgnav.el | grep ';; Version'  |  cut -d : -f 2 | sed -E 's/^ +//' | {
     version="$(cat)"; git tag release-$version;
+    SSH_AUTH_SOCK= git push public release-$version:master
     SSH_AUTH_SOCK= git push public release-$version;
 }
