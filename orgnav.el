@@ -4,7 +4,7 @@
 
 ;; Author: Facet Framer (facet@facetframer.com)
 ;; URL: http://github.com/facetframer/orgnav
-;; Version: 2.0.0
+;; Version: 2.0.3
 ;; Keywords: convenience, outlines
 ;; Package-Requires: ((helm "2.7.0") (s "1.11.0") (dash "1.11.0") (emacs "24"))
 
@@ -52,12 +52,12 @@
     (define-key map (kbd "M-l") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--increase-depth-action)))
     (define-key map (kbd "M-.") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--explore-action)))
     (define-key map (kbd "M-,") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--explore-parent-action)))
+    (define-key map (kbd "M-b") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--back-action)))
     (define-key map (kbd "M-r") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--rename-action)))
     (define-key map (kbd "M-g") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--goto-action)))
     (define-key map (kbd "M-c") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--clock-action)))
     (define-key map (kbd "M-a") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--explore-ancestors-action)))
     (define-key map (kbd "M-n") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--new-action)))
-    (define-key map (kbd "M-b") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--back-action)))
   (define-key map (kbd "M-v") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--show-path-action)))
     (define-key map (kbd "M-j") 'helm-next-line)
     (define-key map (kbd "M-k") 'helm-previous-line)
@@ -265,10 +265,11 @@ by default run DEFAULT-ACTION when return pressed."
     (cons "Default action" default-action)
     (cons "Decrease depth `M-h`" 'orgnav--decrease-depth-action)
     (cons "Increase depth `M-l`" 'orgnav--increase-depth-action)
-    (cons "View path `M-v`" 'orgnav--show-path-action)
-    (cons "Go back `M-b`" 'orgnav--back-action)
     (cons "Explore node `M-.`" 'orgnav--explore-action)
     (cons "Explore parent `M-,`" 'orgnav--explore-parent-action)
+    (cons "Go back `M-b`" 'orgnav--back-action)
+
+    (cons "View path `M-v`" 'orgnav--show-path-action)
     (cons "Create a new node `M-n`" 'orgnav--new-action)
     (cons "Rename node `M-r`" 'orgnav--rename-action)
     (cons "Go to node `M-g`" 'orgnav--goto-action)

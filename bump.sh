@@ -39,4 +39,7 @@ fi;
     echo "$new_version"
     sed "s/Version:.*/Version: $new_version/" -i orgnav.el
 
+    git add orgnav.el
+    git commit -m "Bump version to $new_version";
+    git log -p HEAD^..HEAD | cat
 }

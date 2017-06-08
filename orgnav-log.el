@@ -16,7 +16,7 @@
 (defun orgnav-log (format-string &rest args)
   "Print logging depending of ORGNAV-LOG variable.  FORMAT-STRING  and ARGS have the same meanings as message."
   (when orgnav-log
-    (message format-string args)))
+    (apply 'message format-string args)))
 
 (provide 'orgnav-log)
 ;;; orgnav-log.el ends here
