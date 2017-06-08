@@ -172,6 +172,15 @@
       (if (<= (org-outline-level) level) nil
         (point)))))
 
+(defun orgnav-tree-region (point)
+  "The region containing the org subtree below POINT in the form `(start end)`."
+  (save-excursion
+    (goto-char point)
+    (list
+     (progn
+       (org-back-to-heading 't)
+       (point))
+     (org-end-of-subtree 't))))
 
 (provide 'orgnav-tree)
 ;;; orgnav-tree.el ends here

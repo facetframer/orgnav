@@ -6,7 +6,7 @@
 ;; URL: http://github.com/facetframer/orgnav
 ;; Version: 2.0.3
 ;; Keywords: convenience, outlines
-;; Package-Requires: ((helm "2.7.0") (s "1.11.0") (dash "1.11.0") (emacs "24"))
+;; Package-Requires: ((helm "2.7.0") (s "1.11.0") (dash "1.11.0") (emacs "24") (helm-swoop "1.7.2"))
 
 ;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@
 ;;; Code:
 
 (require 'helm)
+(require 'helm-swoop)
 (require 's)
 (require 'dash)
 (require 'cl-seq)
@@ -53,6 +54,7 @@
     (define-key map (kbd "M-.") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--explore-action)))
     (define-key map (kbd "M-,") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--explore-parent-action)))
     (define-key map (kbd "M-b") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--back-action)))
+    (define-key map (kbd "M-s") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--swoop-action)))
     (define-key map (kbd "M-r") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--rename-action)))
     (define-key map (kbd "M-g") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--goto-action)))
     (define-key map (kbd "M-c") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--clock-action)))
@@ -268,6 +270,7 @@ by default run DEFAULT-ACTION when return pressed."
     (cons "Explore node `M-.`" 'orgnav--explore-action)
     (cons "Explore parent `M-,`" 'orgnav--explore-parent-action)
     (cons "Go back `M-b`" 'orgnav--back-action)
+    (cons "Search content of tree (helm-swoop) `M-s`" 'orgnav--swoop-action)
 
     (cons "View path `M-v`" 'orgnav--show-path-action)
     (cons "Create a new node `M-n`" 'orgnav--new-action)
@@ -335,6 +338,15 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
                       :depth 1
                       :default-action orgnav--var-default-action
                       :helm-buffer-name orgnav--var-helm-buffer))
+
+(defun orgnav--swoop-action (helm-entry)
+  "Search content within `HELM-ENTRY` with `helm-swoop`."
+  (orgnav-log "Action: helm-swoop %S" helm-entry)
+  (-let (((start end) (orgnav-tree-region helm-entry)))
+    (save-restriction
+      (goto-char helm-entry)
+      (narrow-to-region start end)
+      (helm-swoop :$query ""))))
 
 (defun orgnav--explore-ancestors-action (helm-entry)
   "Start search again looking ancestors of HELM-ENTRY."
