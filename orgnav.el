@@ -58,7 +58,7 @@
     (define-key map (kbd "M-c") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--clock-action)))
     (define-key map (kbd "M-a") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--explore-ancestors-action)))
     (define-key map (kbd "M-n") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--new-action)))
-  (define-key map (kbd "M-v") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--show-path-action)))
+    (define-key map (kbd "M-v") (lambda () (interactive) (helm-exit-and-execute-action 'orgnav--show-path-action)))
     (define-key map (kbd "M-j") 'helm-next-line)
     (define-key map (kbd "M-k") 'helm-previous-line)
     map)
