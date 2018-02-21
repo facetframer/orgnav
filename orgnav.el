@@ -4,7 +4,7 @@
 
 ;; Author: Facet Framer (facet@facetframer.com)
 ;; URL: http://github.com/facetframer/orgnav
-;; Version: 2.0.3
+;; Version: 2.1.0
 ;; Keywords: convenience, outlines
 ;; Package-Requires: ((helm "2.7.0") (s "1.11.0") (dash "1.11.0") (emacs "24") (helm-swoop "1.7.2"))
 
