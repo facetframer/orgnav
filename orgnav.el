@@ -382,7 +382,7 @@ Only returning those between with a level better MIN-LEVEL and MAX-LEVEL."
   "Search again hiding more descendents.  IGNORED is ignored."
   (orgnav-log "Action: decrease depth of search")
   (orgnav--tweak-search
-   :depth (max (- orgnav--var-depth 1) 1)
+   :depth (max (- orgnav--var-depth 1) 0)
    :input (orgnav--get-input)))
 
 (defun orgnav--show-path-action (helm-entry)

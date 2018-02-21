@@ -51,18 +51,20 @@
         (goto-char point)
         (substring-no-properties (org-get-heading))))))
 
-(defun orgnav-tree-get-descendants (tree &optional depth)
-  "Get the positions of all the headings under the tree at TREE up to DEPTH."
+(defun orgnav-tree-get-descendants (tree &optional depth min-depth)
+  "Get the positions of all the headings under the tree at TREE up to DEPTH.  Exclude headings with depth less than MIN-DEPTH."
   (interactive)
+  (orgnav-log
+   "(orgnav-tree-get-descendants %S %S %S)"
+   tree depth min-depth)
   (let ((result))
-
-  (save-excursion
-    (when tree (goto-char tree))
-    (if tree
-        (orgnav-tree-tree-map (lambda () (add-to-list 'result (point) 't)) tree depth)
-      (orgnav-tree-buffer-map (lambda () (add-to-list 'result (point) 't)) depth)
-      ))
-  result))
+    (save-excursion
+      (when tree (goto-char tree))
+      (if tree
+          (orgnav-tree-tree-map (lambda () (add-to-list 'result (point) 't)) tree depth min-depth)
+        (orgnav-tree-buffer-map (lambda () (add-to-list 'result (point) 't)) depth min-depth)
+        ))
+    result))
 
 (defun orgnav-tree-rename (point name)
   "Rename the node at POINT to NAME."
@@ -76,19 +78,25 @@
       (kill-line)
       (insert new-heading))))
 
-(defun orgnav-tree-tree-map (fun node depth)
-  "Call FUN at NODE and all its descendants up to depth DEPTH."
+(defun orgnav-tree-tree-map (fun node depth &optional min-depth)
+  "Call FUN at NODE and all its descendants up to depth DEPTH.  Exclude nodes with depth less that MIN-DEPTH."
+  (orgnav-log "(orgnav-tree-tree-map %S %S %S %S)"
+              (orgnav-tree--format-func fun) node depth min-depth)
+  (setq min-depth (or min-depth 0))
   (save-excursion
     (goto-char node)
-    (funcall fun)
-    (let ((child (orgnav-tree--first-child node)))
-      (when child (orgnav-tree--forest-map fun child (- depth 1))))))
 
-(defun orgnav-tree-buffer-map (fun depth)
-  "Call FUN at all nodes in the current buffer up to a depth DEPTH."
+    (when (<= (or min-depth 0) 0)
+        (funcall fun))
+
+    (let ((child (orgnav-tree--first-child node)))
+      (when child (orgnav-tree--forest-map fun child depth (- min-depth 1))))))
+
+(defun orgnav-tree-buffer-map (fun depth min-depth)
+  "Call FUN at all nodes in the current buffer up to a depth DEPTH.  Exclude nodes with depth less that MIN-DEPTH."
   (save-excursion
     (orgnav-tree--goto-buffer-first)
-    (orgnav-tree--forest-map fun (point) (- depth 1))))
+    (orgnav-tree--forest-map fun (point) depth min-depth)))
 
 (defun orgnav-tree--goto-buffer-first ()
   "Go to the first heading in the current buffer."
@@ -96,51 +104,57 @@
   (when (not (outline-on-heading-p 't))
            (outline-next-heading)))
 
-(defun orgnav-tree--forest-map (fun node depth)
+(defun orgnav-tree--forest-map (fun node depth min-depth)
   ;;; Adapted from org-map-region in org (GPL)
-  "Call FUN for NODE, its siblings and their descendants up to DEPTH."
+  "Call FUN for NODE, its siblings and their descendants up to DEPTH.  Exclude nodes with depth less that MIN-DEPTH."
   (mapcar (lambda (marker)
             (goto-char marker)
             (funcall fun))
-          (orgnav-tree--mark-nodes node depth)))
+          (orgnav-tree--mark-nodes node depth min-depth)))
 
-(defun orgnav-tree--mark-nodes (node depth)
-  "Collect markers for all the nodes in the subtree of NODE with depth less than DEPTH."
+(defun orgnav-tree--mark-nodes (node depth min-depth)
+  "Collect markers for all the nodes in the subtree of NODE with depth less than DEPTH.  Exclude nodes with depth less that MIN-DEPTH."
   (let (result)
     (orgnav-tree--forest-map-raw
      (lambda ()  (add-to-list 'result (point-marker)))
      node
-     depth)
+     depth
+     min-depth)
     (reverse result)))
 
-(defun orgnav-tree--forest-map-raw (fun node depth)
+(defun orgnav-tree--format-func (fun)
+  "Format a function FUN to be readable."
+  (if (and
+       (listp fun)
+       (equal (car fun) 'closure))
+      "orgnav-closure"
+    (format "%S" fun)))
+
+(defun orgnav-tree--forest-map-raw (fun node depth min-depth)
   ;;; Adapted from org-map-region in org (GPL)
-  "Call FUN for NODE, its siblings and their descendants up to DEPTH.  Does not deal with modification."
-  (orgnav-log "(orgnav-tree--forest-map-raw %S %S %S)"
+  "Call FUN for NODE, its siblings and their descendants up to DEPTH.  Does not deal with modification.  Exclude nodes with depth less that MIN-DEPTH."
+  (orgnav-log "(orgnav-tree--forest-map-raw %S %S %S %S)"
               ;;; lexical-binding(?) closures
               ;;; can be very verbose
-              (if (and
-                   (listp fun)
-                   (equal (car fun) 'closure))
-                  "orgnav-closure"
-                fun)
+              (orgnav-tree--format-func fun)
               node
-              depth)
+              depth
+              min-depth)
   (let ((finished nil))
     (let ((org-ignore-region t))
-      (when (>= depth 0)
+      (when (> depth 0)
         (save-excursion
           (goto-char node)
           (while (not finished)
-            (funcall fun)
-            (when (> depth 0)
+            (when (<= (or min-depth 0) 0)
+              (funcall fun))
+            (when (> depth 1)
               (let ((child (orgnav-tree--first-child (point))))
-                (when child (orgnav-tree--forest-map-raw fun child (- depth 1)))))
+                (when child (orgnav-tree--forest-map-raw fun child (- depth 1) min-depth))))
             (condition-case nil
                 (orgnav-hack-outline-forward-same-level 1)
               (orgnav-last-error
                (setq finished 't)))))))))
-
 
 (defun orgnav-tree-ancestors (&optional point)
   "Find the ancestors of the current org node (or the one at POINT)."
