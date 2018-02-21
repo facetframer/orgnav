@@ -25,7 +25,9 @@
 
 ;;; Code:
 
+(require 'org-clock)
 (require 'orgnav)
+(require 'cl-lib)
 
 (defvar orgnav-clock-buffer nil "The buffer to search when clocking in.")
 (defvar orgnav-clock-depth 2 "How many levels to show for clock operations.")
@@ -70,7 +72,7 @@ If nothing is clocking find something relative to root."
 
 (defun orgnav-clock-goto ()
   "Go to the currently clocking item.  Like `org-clock-goto` but does not change window."
-  (assert (org-clocking-p))
+  (cl-assert (org-clocking-p))
   (set-buffer (marker-buffer org-clock-marker))
   (goto-char org-clock-marker))
 
