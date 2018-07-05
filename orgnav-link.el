@@ -31,9 +31,21 @@
   (interactive (list nil))
   (orgnav-link--insert (orgnav-link--get-set-custom-id (orgnav-search-subtree-sync point :depth (or depth orgnav-link-depth)))))
 
+(defun orgnav-link-new-nearby (levels &optional depth)
+  "Insert a link near the current node, LEVELS level up"
+  (interactive (list 1))
+  (orgnav-link-new
+   (orgnav-tree-get-ancestor (point) levels)
+   (or depth orgnav-link-depth)))
+
 (defun orgnav-link--insert (custom-id)
   "Insert a new link to the node with the property CUSTOM-ID."
   (insert (format "[[#%s]]" custom-id)))
+
+(defun orgnav-link-identify ()
+  (interactive)
+  (orgnav-link--get-set-custom-id (orgnav-tree-previous-node)))
+
 
 (defun orgnav-link--get-set-custom-id (point)
   "Get (or set and get) the custom id property for the node at POINT."
