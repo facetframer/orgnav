@@ -50,7 +50,7 @@
 
 (defun orgnav-tree-get-heading (buffer point)
   "Get the heading of an org element in BUFFER at POINT."
-  (with-current-buffer buffer
+  (with-current-buffer (or buffer (current-buffer))
     (save-excursion
       (setq point (or point (point)))
       (progn
