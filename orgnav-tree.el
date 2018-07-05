@@ -42,6 +42,12 @@
           (point))
       (error nil))))
 
+(defun orgnav-tree-previous-node ()
+  (save-excursion
+    (org-back-to-heading 't)
+    (point)))
+
+
 (defun orgnav-tree-get-heading (buffer point)
   "Get the heading of an org element in BUFFER at POINT."
   (with-current-buffer buffer
