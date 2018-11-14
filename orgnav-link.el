@@ -26,10 +26,14 @@
 
 (defvar orgnav-link-depth 3 "How many levels to display when creating links.")
 
+(defun orgnav-link-point (point)
+  (orgnav-link--insert (orgnav-link--get-set-custom-id point)))
+
 (defun orgnav-link-new (point &optional depth)
   "Insert link to a child of POINT.  If POINT is nil search the entire buffer.  Show DEPTH levels."
   (interactive (list nil))
-  (orgnav-link--insert (orgnav-link--get-set-custom-id (orgnav-search-subtree-sync point :depth (or depth orgnav-link-depth)))))
+  (orgnav-link-point (orgnav-search-subtree-sync point :depth (or depth orgnav-link-depth))))
+
 
 (defun orgnav-link-new-nearby (levels &optional depth)
   "Insert a link near the current node, LEVELS level up"
